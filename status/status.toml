@@ -1,0 +1,663 @@
+# Source of truth for project status (ADR-011).
+# Edit this file, then run:  python scripts/status/render_status.py
+# which validates it and regenerates status/STATUS.md (never edit STATUS.md by hand).
+#
+# Status values: NOT_STARTED | DESIGN | IN_PROGRESS | BLOCKED | IN_REVIEW | DONE
+# Task status values: TODO | DOING | BLOCKED | DONE
+# Module definitions and exit criteria: docs/MODULES.md
+
+[project]
+name = "Private AI Video Production Platform"
+codename = "yas-video-generator"
+target_hardware = "ASUS Ascent GX10 (NVIDIA GB10, 128 GB unified, arm64)"
+current_phase = "P0"
+updated = "2026-09-29"
+
+# ---------------------------------------------------------------- phases
+[[phases]]
+id = "P0"
+name = "Foundations & GX10 spike"
+status = "IN_PROGRESS"
+
+[[phases]]
+id = "P1"
+name = "Infrastructure"
+status = "NOT_STARTED"
+
+[[phases]]
+id = "P2"
+name = "Project system"
+status = "NOT_STARTED"
+
+[[phases]]
+id = "P3"
+name = "AI Director"
+status = "NOT_STARTED"
+
+[[phases]]
+id = "P4"
+name = "Generation core"
+status = "NOT_STARTED"
+
+[[phases]]
+id = "P5"
+name = "Reference system"
+status = "NOT_STARTED"
+
+[[phases]]
+id = "P6"
+name = "QC & regeneration (MVP gate)"
+status = "NOT_STARTED"
+
+[[phases]]
+id = "P7"
+name = "LoRA & continuity"
+status = "NOT_STARTED"
+
+[[phases]]
+id = "P8"
+name = "Audio"
+status = "NOT_STARTED"
+
+[[phases]]
+id = "P9"
+name = "Timeline & render"
+status = "NOT_STARTED"
+
+[[phases]]
+id = "P10"
+name = "Production hardening"
+status = "NOT_STARTED"
+
+# ---------------------------------------------------------------- modules
+[[modules]]
+id = "M00"
+name = "Repository, governance & CI"
+phases = ["P0"]
+status = "IN_PROGRESS"
+owner = ""
+tasks = [
+  { title = "Save original spec verbatim (docs/spec)", status = "DONE" },
+  { title = "Specification review (docs/review)", status = "DONE" },
+  { title = "ADR log (docs/DECISIONS.md)", status = "DONE" },
+  { title = "Module catalog + phase plan (docs/MODULES.md)", status = "DONE" },
+  { title = "Status tracker + renderer", status = "DONE" },
+  { title = "git init + initial commit", status = "DONE" },
+  { title = "Owner sign-off on Proposed ADRs (001-007, 009, 010)", status = "TODO" },
+  { title = "Answer open questions (review section 9)", status = "TODO" },
+  { title = "Create remote + branch protection", status = "TODO" },
+  { title = "CI: lint, type-check, tests, arm64 buildx", status = "TODO" },
+  { title = "pre-commit hooks (ruff, mypy, eslint, prettier)", status = "TODO" },
+]
+
+[[modules]]
+id = "M01"
+name = "Infrastructure & Compose"
+phases = ["P1"]
+status = "NOT_STARTED"
+owner = ""
+tasks = [
+  { title = "docker-compose.yml: postgres+pgvector, redis, minio, api, worker, scheduler, frontend, nginx", status = "TODO" },
+  { title = "Compose profiles: gpu (ai-engine, llm), monitoring", status = "TODO" },
+  { title = "Multi-arch Dockerfiles (arm64 required)", status = "TODO" },
+  { title = "nginx: private routing + /media auth_request (ADR-010)", status = "TODO" },
+  { title = ".env.example (amended spec 55)", status = "TODO" },
+]
+
+[[modules]]
+id = "M02"
+name = "Hardware detection & System API"
+phases = ["P0", "P1"]
+status = "NOT_STARTED"
+owner = ""
+tasks = [
+  { title = "scripts/setup/verify_gx10.sh (spec 74 output)", status = "TODO" },
+  { title = "Hardware probe service (uname, nvidia-smi, torch, disk, memory)", status = "TODO" },
+  { title = "GET /api/v1/system/capabilities + /hardware", status = "TODO" },
+  { title = "/health, /health/{database,redis,minio,gpu,models,comfyui}", status = "TODO" },
+]
+
+[[modules]]
+id = "M03"
+name = "Backend core"
+phases = ["P1"]
+status = "NOT_STARTED"
+owner = ""
+tasks = [
+  { title = "FastAPI app skeleton + pydantic-settings", status = "TODO" },
+  { title = "Structured JSON logging + correlation IDs", status = "TODO" },
+  { title = "SQLAlchemy 2 async + Alembic baseline", status = "TODO" },
+  { title = "Error model + exception handlers", status = "TODO" },
+  { title = "Egress guard (NETWORK_MODE / ENABLE_EXTERNAL_APIS)", status = "TODO" },
+]
+
+[[modules]]
+id = "M04"
+name = "Authentication & RBAC"
+phases = ["P1", "P10"]
+status = "NOT_STARTED"
+owner = ""
+tasks = [
+  { title = "JWT access + rotating refresh, local admin", status = "TODO" },
+  { title = "Roles + permissions (spec 39)", status = "TODO" },
+  { title = "Project membership enforcement + tests", status = "TODO" },
+]
+
+[[modules]]
+id = "M05"
+name = "Projects & Story Bible"
+phases = ["P2"]
+status = "NOT_STARTED"
+owner = ""
+tasks = [
+  { title = "Projects CRUD (+fps, aspect ratio, default profile)", status = "TODO" },
+  { title = "Story Bible (single active, versioned)", status = "TODO" },
+]
+
+[[modules]]
+id = "M06"
+name = "Characters & Costumes"
+phases = ["P2"]
+status = "NOT_STARTED"
+owner = ""
+tasks = [
+  { title = "Character CRUD + likeness/consent fields", status = "TODO" },
+  { title = "Character references: upload, approve, version", status = "TODO" },
+  { title = "Costumes CRUD", status = "TODO" },
+]
+
+[[modules]]
+id = "M07"
+name = "Environments & Props"
+phases = ["P2"]
+status = "NOT_STARTED"
+owner = ""
+tasks = [
+  { title = "Environment CRUD + references", status = "TODO" },
+  { title = "Props CRUD + prop_references", status = "TODO" },
+]
+
+[[modules]]
+id = "M08"
+name = "Episodes, Scenes, Shots & Approvals"
+phases = ["P2", "P3"]
+status = "NOT_STARTED"
+owner = ""
+tasks = [
+  { title = "docs/architecture/state-machines.md", status = "TODO" },
+  { title = "Episode/scene/shot tables + join tables", status = "TODO" },
+  { title = "Approvals table + gate configuration", status = "TODO" },
+  { title = "continuity_events table", status = "TODO" },
+]
+
+[[modules]]
+id = "M09"
+name = "Assets & Storage"
+phases = ["P2"]
+status = "NOT_STARTED"
+owner = ""
+tasks = [
+  { title = "Immutable assets + lineage + checksums", status = "TODO" },
+  { title = "MinIO buckets + client", status = "TODO" },
+  { title = "Thumbnails", status = "TODO" },
+  { title = "Authenticated /media delivery", status = "TODO" },
+  { title = "asset_embeddings table (ADR-009)", status = "TODO" },
+]
+
+[[modules]]
+id = "M10"
+name = "Prompt Engine & Versioning"
+phases = ["P3"]
+status = "NOT_STARTED"
+owner = ""
+tasks = [
+  { title = "Deterministic section builder + snapshot tests", status = "TODO" },
+  { title = "prompt_versions + diff API", status = "TODO" },
+]
+
+[[modules]]
+id = "M11"
+name = "LLM Provider Layer"
+phases = ["P3"]
+status = "NOT_STARTED"
+owner = ""
+tasks = [
+  { title = "LLMProvider ABC + LocalLLMProvider (OpenAI-compatible)", status = "TODO" },
+  { title = "JSON-schema constrained output + validated retries", status = "TODO" },
+  { title = "OptionalExternalLLMProvider behind egress guard", status = "TODO" },
+]
+
+[[modules]]
+id = "M12"
+name = "AI Director"
+phases = ["P3"]
+status = "NOT_STARTED"
+owner = ""
+tasks = [
+  { title = "Planning schemas (episode/scene/shot)", status = "TODO" },
+  { title = "Hierarchical directors (story, scene, shot, prompt)", status = "TODO" },
+  { title = "Planning provenance (model, template, raw output)", status = "TODO" },
+]
+
+[[modules]]
+id = "M13"
+name = "Realtime Events (WebSocket)"
+phases = ["P3", "P4"]
+status = "NOT_STARTED"
+owner = ""
+tasks = [
+  { title = "/ws/projects/{id} with auth + spec 46 events", status = "TODO" },
+]
+
+[[modules]]
+id = "M14"
+name = "Job System & Workers"
+phases = ["P1", "P3"]
+status = "NOT_STARTED"
+owner = ""
+tasks = [
+  { title = "generation_jobs table + lease/heartbeat (ADR-003)", status = "TODO" },
+  { title = "Worker loop + idempotency keys + backoff", status = "TODO" },
+  { title = "Crash-recovery tests", status = "TODO" },
+  { title = "contracts/ shared job payload schemas", status = "TODO" },
+]
+
+[[modules]]
+id = "M15"
+name = "GPU Scheduler & Worker Registry"
+phases = ["P4"]
+status = "NOT_STARTED"
+owner = ""
+tasks = [
+  { title = "Worker registry + heartbeat (spec 67)", status = "TODO" },
+  { title = "Memory ledger from measured profiles (ADR-005)", status = "TODO" },
+  { title = "LLM tenancy (unload before video jobs)", status = "TODO" },
+]
+
+[[modules]]
+id = "M16"
+name = "Model Registry & License Registry"
+phases = ["P4"]
+status = "NOT_STARTED"
+owner = ""
+tasks = [
+  { title = "model_registry + states", status = "TODO" },
+  { title = "model_licenses + admin approval gate", status = "TODO" },
+  { title = "scripts/models/fetch.py: pinned revision + SHA256 + offline bundle", status = "TODO" },
+  { title = "Verify licenses for LTX-2.3, image model, QC face model", status = "TODO" },
+]
+
+[[modules]]
+id = "M17"
+name = "AI Engine Runtime"
+phases = ["P0", "P4"]
+status = "NOT_STARTED"
+owner = ""
+tasks = [
+  { title = "SPIKE: NGC PyTorch arm64 on GB10, torch.cuda smoke test", status = "TODO" },
+  { title = "SPIKE: LTX-2.3 i2v one clip; record time + peak memory", status = "TODO" },
+  { title = "ai-engine image (ADR-007) + GPU job loop", status = "TODO" },
+  { title = "Model load/unload with measured memory + cooperative cancel", status = "TODO" },
+]
+
+[[modules]]
+id = "M18"
+name = "Video Providers"
+phases = ["P4"]
+status = "NOT_STARTED"
+owner = ""
+blocked_by = "ADR-004 decision"
+tasks = [
+  { title = "VideoProvider ABC with capabilities (ADR-006)", status = "TODO" },
+  { title = "LTXProvider: i2v, t2v, first/last frame", status = "TODO" },
+  { title = "Profiles Draft/Preview/Production + two-stage upscale", status = "TODO" },
+  { title = "Hunyuan/Wan providers report UNSUPPORTED until verified", status = "TODO" },
+]
+
+[[modules]]
+id = "M19"
+name = "Image / Keyframe Provider"
+phases = ["P4"]
+status = "NOT_STARTED"
+owner = ""
+tasks = [
+  { title = "ADR-008 shortlist + benchmark", status = "TODO" },
+  { title = "ImageProvider with reference conditioning", status = "TODO" },
+]
+
+[[modules]]
+id = "M20"
+name = "Reference Retrieval & Embeddings"
+phases = ["P5"]
+status = "NOT_STARTED"
+owner = ""
+tasks = [
+  { title = "EmbeddingProvider + embedding jobs", status = "TODO" },
+  { title = "Ranked retrieval of approved refs per shot", status = "TODO" },
+  { title = "Previous-frame chaining (within scene)", status = "TODO" },
+]
+
+[[modules]]
+id = "M21"
+name = "QC Engine"
+phases = ["P6"]
+status = "NOT_STARTED"
+owner = ""
+tasks = [
+  { title = "Technical checks (ffprobe)", status = "TODO" },
+  { title = "Character / environment / adherence / motion scorers", status = "TODO" },
+  { title = "Calibration-set procedure + threshold config", status = "TODO" },
+]
+
+[[modules]]
+id = "M22"
+name = "Regeneration Engine"
+phases = ["P6"]
+status = "NOT_STARTED"
+owner = ""
+tasks = [
+  { title = "Regeneration modes gated by capabilities", status = "TODO" },
+  { title = "Auto rules, max 3 then REVIEW_REQUIRED", status = "TODO" },
+]
+
+[[modules]]
+id = "M23"
+name = "Continuity Engine"
+phases = ["P7"]
+status = "NOT_STARTED"
+owner = ""
+tasks = [
+  { title = "Rule checks + override with reason", status = "TODO" },
+  { title = "episode_end_states + continuity_context injection", status = "TODO" },
+]
+
+[[modules]]
+id = "M24"
+name = "LoRA Training & Management"
+phases = ["P7"]
+status = "NOT_STARTED"
+owner = ""
+tasks = [
+  { title = "Benchmark LoRA training on GB10", status = "TODO" },
+  { title = "Dataset prep + training state machine", status = "TODO" },
+  { title = "LoRA selection + strength in generation", status = "TODO" },
+]
+
+[[modules]]
+id = "M25"
+name = "Audio"
+phases = ["P8"]
+status = "NOT_STARTED"
+owner = ""
+tasks = [
+  { title = "Speech/Music/SFX provider interfaces + local impls", status = "TODO" },
+  { title = "Voices linked to characters, consent-gated cloning", status = "TODO" },
+]
+
+[[modules]]
+id = "M26"
+name = "Timeline & Render"
+phases = ["P6", "P9"]
+status = "NOT_STARTED"
+owner = ""
+tasks = [
+  { title = "MVP preview: concatenate approved shots", status = "TODO" },
+  { title = "timelines (EDL) + audio sync + subtitles", status = "TODO" },
+  { title = "Render preview/1080p/4K-upscale", status = "TODO" },
+]
+
+[[modules]]
+id = "M27"
+name = "Web Portal (Frontend)"
+phases = ["P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8", "P9"]
+status = "NOT_STARTED"
+owner = ""
+tasks = [
+  { title = "Vite + React + TS + Tailwind + React Query shell, login", status = "TODO" },
+  { title = "Dashboard + Project tabs", status = "TODO" },
+  { title = "Character / Environment Studio", status = "TODO" },
+  { title = "Episode / Shot Studio", status = "TODO" },
+  { title = "Render Studio", status = "TODO" },
+]
+
+[[modules]]
+id = "M28"
+name = "Audit & Provenance"
+phases = ["P4", "P10"]
+status = "NOT_STARTED"
+owner = ""
+tasks = [
+  { title = "Attempt provenance incl. hardware/software versions", status = "TODO" },
+  { title = "'Why does this shot look like this' view", status = "TODO" },
+  { title = "audit_logs for user actions", status = "TODO" },
+]
+
+[[modules]]
+id = "M29"
+name = "Observability"
+phases = ["P1", "P10"]
+status = "NOT_STARTED"
+owner = ""
+tasks = [
+  { title = "Prometheus metrics (spec 52)", status = "TODO" },
+  { title = "GB10 GPU/memory exporter validation", status = "TODO" },
+  { title = "Grafana dashboards + alerts", status = "TODO" },
+]
+
+[[modules]]
+id = "M30"
+name = "Backup & Retention"
+phases = ["P10"]
+status = "NOT_STARTED"
+owner = ""
+tasks = [
+  { title = "Postgres + MinIO backup", status = "TODO" },
+  { title = "Restore drill", status = "TODO" },
+  { title = "Failed-attempt media retention policy", status = "TODO" },
+]
+
+[[modules]]
+id = "M31"
+name = "Install & Ops Scripts"
+phases = ["P1", "P10"]
+status = "NOT_STARTED"
+owner = ""
+tasks = [
+  { title = "scripts/setup/install.sh (spec 74, idempotent)", status = "TODO" },
+  { title = "Offline install path", status = "TODO" },
+]
+
+[[modules]]
+id = "M32"
+name = "Documentation"
+phases = ["P0", "P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8", "P9", "P10"]
+status = "IN_PROGRESS"
+owner = ""
+tasks = [
+  { title = "Planning docs (spec, review, ADRs, modules)", status = "DONE" },
+  { title = "architecture.md", status = "TODO" },
+  { title = "developer-guide.md", status = "TODO" },
+  { title = "deployment.md + offline-operation.md", status = "TODO" },
+  { title = "models.md (benchmarks + licenses)", status = "TODO" },
+  { title = "api.md", status = "TODO" },
+  { title = "security.md", status = "TODO" },
+  { title = "character/environment consistency, episode-generation, lora-training, troubleshooting", status = "TODO" },
+]
+
+[[modules]]
+id = "M33"
+name = "Security, Privacy & Likeness Consent"
+phases = ["P2", "P10"]
+status = "NOT_STARTED"
+owner = ""
+tasks = [
+  { title = "Consent records for real-person likeness/voice", status = "TODO" },
+  { title = "Offline egress test (zero external calls)", status = "TODO" },
+  { title = "Threat model + security review", status = "TODO" },
+]
+
+# ---------------------------------------------------------------- spec 83 Definition of Done
+[[dod]]
+item = "GX10 detected"
+module = "M02"
+done = false
+
+[[dod]]
+item = "ARM64 verified"
+module = "M02"
+done = false
+
+[[dod]]
+item = "NVIDIA GPU verified"
+module = "M02"
+done = false
+
+[[dod]]
+item = "CUDA verified"
+module = "M17"
+done = false
+
+[[dod]]
+item = "PostgreSQL operational"
+module = "M01"
+done = false
+
+[[dod]]
+item = "Redis operational"
+module = "M01"
+done = false
+
+[[dod]]
+item = "MinIO operational"
+module = "M01"
+done = false
+
+[[dod]]
+item = "FastAPI operational"
+module = "M03"
+done = false
+
+[[dod]]
+item = "React UI operational"
+module = "M27"
+done = false
+
+[[dod]]
+item = "Local LLM operational"
+module = "M11"
+done = false
+
+[[dod]]
+item = "LTX operational"
+module = "M18"
+done = false
+
+[[dod]]
+item = "Character references operational"
+module = "M06"
+done = false
+
+[[dod]]
+item = "Environment references operational"
+module = "M07"
+done = false
+
+[[dod]]
+item = "Character LoRA operational"
+module = "M24"
+done = false
+
+[[dod]]
+item = "Shot planning operational"
+module = "M12"
+done = false
+
+[[dod]]
+item = "Image-to-video operational"
+module = "M18"
+done = false
+
+[[dod]]
+item = "Previous-frame chaining operational"
+module = "M20"
+done = false
+
+[[dod]]
+item = "QC operational"
+module = "M21"
+done = false
+
+[[dod]]
+item = "Regeneration operational"
+module = "M22"
+done = false
+
+[[dod]]
+item = "Audio operational"
+module = "M25"
+done = false
+
+[[dod]]
+item = "Timeline operational"
+module = "M26"
+done = false
+
+[[dod]]
+item = "FFmpeg rendering operational"
+module = "M26"
+done = false
+
+[[dod]]
+item = "Authentication operational"
+module = "M04"
+done = false
+
+[[dod]]
+item = "RBAC operational"
+module = "M04"
+done = false
+
+[[dod]]
+item = "Audit logging operational"
+module = "M28"
+done = false
+
+[[dod]]
+item = "Monitoring operational"
+module = "M29"
+done = false
+
+[[dod]]
+item = "Backup operational"
+module = "M30"
+done = false
+
+[[dod]]
+item = "Offline mode tested"
+module = "M33"
+done = false
+
+[[dod]]
+item = "10-minute episode tested"
+module = "M26"
+done = false
+
+[[dod]]
+item = "Multi-scene continuity tested"
+module = "M23"
+done = false
+
+[[dod]]
+item = "Multi-episode continuity tested"
+module = "M23"
+done = false
+
+[[dod]]
+item = "Failure recovery tested"
+module = "M14"
+done = false
+
+[[dod]]
+item = "Security review completed"
+module = "M33"
+done = false
