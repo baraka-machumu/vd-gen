@@ -115,7 +115,7 @@ Exit: an NGC arm64 image (ADR-007), a job execution loop that claims GPU jobs, m
 
 **M18: Video Providers**
 P4 (LTX), post-MVP (Hunyuan/Wan) · `ai-engine/ltx/`, `ai-engine/hunyuan/`, `ai-engine/wan/`, `workflows/` · §6, §7, §8, §57, §58, §72, §79 · M17
-Exit: LTX-2.3 i2v + t2v (+ first/last frame if supported) via the capability interface (ADR-006), Draft/Preview/Production profiles, and two-stage upscale. Unverified providers report `UNSUPPORTED_ON_CURRENT_HARDWARE`. The workflow recipe is stored per attempt (ADR-004).
+Exit: LTX-2.3 i2v + t2v (+ first/last frame if supported) via native official pipelines (ADR-004) and the capability interface (ADR-006), Draft/Preview/Production profiles, and two-stage upscale. Unverified providers report `UNSUPPORTED_ON_CURRENT_HARDWARE`. The workflow recipe is stored per attempt (ADR-004).
 
 **M19: Image / Keyframe Provider**
 P4 · `ai-engine/image/` · §21, §79 · M17
@@ -181,7 +181,7 @@ Exit: the §76 doc set, each doc written in the phase of the module it describes
 
 **M33: Security, Privacy & Likeness Consent**
 P2 (consent), P10 (review) · cross-cutting · §38, §39, §65, review M1/M2 · M04, M09
-Exit: consent records required for real-person likeness/voice, egress tests (runtime makes **zero** external calls in offline mode), a threat model, and a security review (§83).
+Exit: employee consent records required before approving any likeness/voice reference, and consent withdrawal handling (ADR-012), egress tests (runtime makes **zero** external calls in offline mode), a threat model, and a security review (§83).
 
 ---
 

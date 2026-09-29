@@ -182,9 +182,11 @@ The MVP = Phases 0–6, gated by the §69 acceptance test. See [`../MODULES.md`]
 
 ## 9. Open questions for the product owner
 
-1. **Legal/licensing:** which jurisdiction(s) will the platform be used in, and what is the company's revenue band? (This decides LTX and Hunyuan eligibility.)
-2. **Content:** will real people's likenesses or voices be used? If so, who signs the consent?
-3. **Team:** how many engineers, and does anyone have physical access to the GX10 for bring-up?
-4. **Throughput expectation:** how many finished minutes per week does the business need? (This decides whether a second GX10 (§66) is a year-one requirement.)
-5. **Local LLM preference:** is there an approved model family, and what is its license?
-6. **Execution backend for the MVP:** native pipelines (recommended) or ComfyUI-first? (ADR-004)
+| # | Question | Answer (2026-09-29) |
+|---|---|---|
+| 1 | **Deployment/legal:** where will the platform be used, and what is the company's revenue band (this decides LTX/Hunyuan eligibility)? | Private office network. **Revenue band still open**: internal use is still commercial use, so the model licenses must be checked (M16). See ADR-012. |
+| 2 | **Content:** will real people's likenesses or voices be used? Who consents? | Yes, **employees**. Consent records are mandatory, consent can be withdrawn, and the data is sensitive. See ADR-012. |
+| 3 | **Team / GX10 access:** who does bring-up? | The product owner deploys to the GX10 and runs the P0 spike. **Team size still open.** |
+| 4 | **Throughput expectation:** finished minutes per week? | **Open.** Set it after the P0 benchmark. |
+| 5 | **Local LLM preference / license?** | **Open.** |
+| 6 | **Execution backend for the MVP?** | Native pipelines, the recommended option. ADR-004 is accepted. |

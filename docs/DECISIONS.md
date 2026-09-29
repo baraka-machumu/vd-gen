@@ -9,7 +9,7 @@ When an ADR changes a module's scope, update [`MODULES.md`](MODULES.md) and [`..
 | 001 | Monorepo layout per spec §54 | Proposed | M00 |
 | 002 | Control plane / GPU plane split | Proposed | M01, M17 |
 | 003 | Job system: Postgres is the source of truth, Redis carries signals only | Proposed | M14 |
-| 004 | MVP execution backend: native pipelines, ComfyUI after the MVP | Proposed (**needs owner input**) | M17, M18 |
+| 004 | MVP execution backend: native pipelines, ComfyUI after the MVP | Accepted (2026-09-29) | M17, M18 |
 | 005 | Unified-memory GPU scheduler; the LLM is a GPU tenant | Proposed | M15 |
 | 006 | One capability-based provider interface per modality | Proposed | M11, M18, M19, M25 |
 | 007 | GPU images are based on NVIDIA NGC arm64 containers | Proposed | M17 |
@@ -17,6 +17,7 @@ When an ADR changes a module's scope, update [`MODULES.md`](MODULES.md) and [`..
 | 009 | A single `asset_embeddings` table; visual memory is a view | Proposed | M09, M20 |
 | 010 | Media delivery through nginx `auth_request`; MinIO never exposed | Proposed | M09, M01 |
 | 011 | Status tracking lives in `status/status.toml` | Accepted (2026-09-29) | — |
+| 012 | Deployment scope: private office network, employee likenesses | Accepted (2026-09-29) | M01, M06, M25, M33 |
 
 ---
 
@@ -48,9 +49,9 @@ When an ADR changes a module's scope, update [`MODULES.md`](MODULES.md) and [`..
 ## ADR-004: MVP execution backend: native pipelines, ComfyUI after the MVP
 
 **Context.** Spec §7 prefers official Lightricks pipelines. §8 wants ComfyUI as an optional backend. Doing both before the MVP doubles the integration work (review S2).
-**Decision (proposed).** The `ai-engine` runs official LTX Python pipelines behind `VideoProvider`. A **workflow** is a versioned JSON recipe (`{backend: "native", pipeline, version, params}`) stored in `generation_workflows`, which satisfies §8 reproducibility. The ComfyUI backend (`{backend: "comfyui", graph}`) comes after the MVP.
-**Alternative.** Go ComfyUI-first if the team already has proven LTX ComfyUI graphs. Either choice satisfies the spec, but the team must pick exactly one.
-**Needs:** product owner/tech lead confirmation.
+**Decision.** The `ai-engine` runs official LTX Python pipelines behind `VideoProvider`. A **workflow** is a versioned JSON recipe (`{backend: "native", pipeline, version, params}`) stored in `generation_workflows`, which satisfies §8 reproducibility. The ComfyUI backend (`{backend: "comfyui", graph}`) comes after the MVP.
+**Alternative considered.** ComfyUI-first, rejected for the MVP because it would mean running two execution paths before the MVP.
+**Accepted** 2026-09-29 by the product owner.
 
 ## ADR-005: Unified-memory GPU scheduler; the LLM is a GPU tenant
 
@@ -90,3 +91,18 @@ When an ADR changes a module's scope, update [`MODULES.md`](MODULES.md) and [`..
 ## ADR-011: Status tracking lives in `status/status.toml`
 
 **Decision.** `status/status.toml` is the machine-readable source of truth for module and phase status. `status/STATUS.md` is generated from it with `python scripts/status/render_status.py`, and must never be edited by hand. The Definition-of-Done checklist (§83) is tracked in the same file.
+
+## ADR-012: Deployment scope: private office network, employee likenesses
+
+**Context.** Answers to the review's open questions (review §9), given by the product owner on 2026-09-29.
+**Decision.**
+- The platform is deployed on the **company's private office network only**. It gets no public ingress, and remote access, if needed later, goes through VPN. Spec §66 ("Private LAN/VPN") is the only deployment mode.
+- The characters may be based on **employees'** faces and voices. This is real-person likeness, so the consent controls from review M1 are **mandatory**, not optional (see M33):
+  - Each employee whose face or voice is used signs a consent record before any of their reference assets can be approved. The record states its scope: which projects, face and/or voice, and whether internal-only or external distribution is allowed.
+  - Consent can be **withdrawn** (for example, when the employee leaves). Withdrawal blocks new generations that use that character or voice, and it flags the affected assets for review. It does not silently delete history.
+  - Face embeddings and voice references are treated as **sensitive personal data**. Access is restricted to the project's members, every access is audited, and the data is included in the retention and deletion policy (M30).
+  - HR/legal should review the consent form and confirm which local privacy or biometric-data rules apply.
+- The product owner performs the GX10 deployment and the Phase 0 hardware spike.
+**Consequences.**
+- Internal-only use does **not** remove model-license obligations, because a company using a model internally is still commercial use. M16 license verification stays mandatory.
+- The consent model (M33) moves forward to P2, so it lands together with character references (M06).

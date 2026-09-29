@@ -3,29 +3,29 @@
 
 **Current phase:** P0 · **Updated:** 2026-09-29 · **Target:** ASUS Ascent GX10 (NVIDIA GB10, 128 GB unified, arm64)
 
-**Tasks:** `█░░░░░░░░░░░░░░░░░░░` 7/119 · **Definition of Done (spec §83):** `░░░░░░░░░░░░░░░░░░░░` 0/33
+**Tasks:** `█░░░░░░░░░░░░░░░░░░░` 9/125 · **Definition of Done (spec §83):** `░░░░░░░░░░░░░░░░░░░░` 0/33
 
 ## Phases
 
 | Phase | Name | Status | Modules | Tasks |
 |---|---|---|---|---|
-| **P0** ◀ | Foundations & GX10 spike | 🟡 IN_PROGRESS | M00, M02, M17, M32 | `███░░░░░░░` 7/27 |
+| **P0** ◀ | Foundations & GX10 spike | 🟡 IN_PROGRESS | M00, M02, M17, M32 | `███░░░░░░░` 9/29 |
 | **P1** | Infrastructure | ⚪ NOT_STARTED | M01, M02, M03, M04, M14, M27, M29, M31, M32 | `░░░░░░░░░░` 1/39 |
-| **P2** | Project system | ⚪ NOT_STARTED | M05, M06, M07, M08, M09, M27, M32, M33 | `░░░░░░░░░░` 1/32 |
+| **P2** | Project system | ⚪ NOT_STARTED | M05, M06, M07, M08, M09, M27, M32, M33 | `░░░░░░░░░░` 1/35 |
 | **P3** | AI Director | ⚪ NOT_STARTED | M08, M10, M11, M12, M13, M14, M27, M32 | `░░░░░░░░░░` 1/30 |
-| **P4** | Generation core | ⚪ NOT_STARTED | M13, M15, M16, M17, M18, M19, M27, M28, M32 | `░░░░░░░░░░` 1/34 |
+| **P4** | Generation core | ⚪ NOT_STARTED | M13, M15, M16, M17, M18, M19, M27, M28, M32 | `░░░░░░░░░░` 1/35 |
 | **P5** | Reference system | ⚪ NOT_STARTED | M20, M27, M32 | `█░░░░░░░░░` 1/16 |
 | **P6** | QC & regeneration (MVP gate) | ⚪ NOT_STARTED | M21, M22, M26, M27, M32 | `░░░░░░░░░░` 1/21 |
 | **P7** | LoRA & continuity | ⚪ NOT_STARTED | M23, M24, M27, M32 | `█░░░░░░░░░` 1/18 |
 | **P8** | Audio | ⚪ NOT_STARTED | M25, M27, M32 | `█░░░░░░░░░` 1/15 |
 | **P9** | Timeline & render | ⚪ NOT_STARTED | M26, M27, M32 | `█░░░░░░░░░` 1/16 |
-| **P10** | Production hardening | ⚪ NOT_STARTED | M04, M28, M29, M30, M31, M32, M33 | `░░░░░░░░░░` 1/25 |
+| **P10** | Production hardening | ⚪ NOT_STARTED | M04, M28, M29, M30, M31, M32, M33 | `░░░░░░░░░░` 1/28 |
 
 ## Modules
 
 | ID | Module | Phases | Status | Owner | Progress | Blocked by |
 |---|---|---|---|---|---|---|
-| M00 | Repository, governance & CI | P0 | 🟡 IN_PROGRESS | — | `█████░░░░░` 6/11 |  |
+| M00 | Repository, governance & CI | P0 | 🟡 IN_PROGRESS | — | `██████░░░░` 8/13 |  |
 | M01 | Infrastructure & Compose | P1 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/5 |  |
 | M02 | Hardware detection & System API | P0, P1 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/4 |  |
 | M03 | Backend core | P1 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/5 |  |
@@ -41,9 +41,9 @@
 | M13 | Realtime Events (WebSocket) | P3, P4 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/1 |  |
 | M14 | Job System & Workers | P1, P3 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/4 |  |
 | M15 | GPU Scheduler & Worker Registry | P4 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/3 |  |
-| M16 | Model Registry & License Registry | P4 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/4 |  |
-| M17 | AI Engine Runtime | P0, P4 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/4 |  |
-| M18 | Video Providers | P4 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/4 | ADR-004 decision |
+| M16 | Model Registry & License Registry | P4 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/5 |  |
+| M17 | AI Engine Runtime | P0, P4 | ⚪ NOT_STARTED | Product owner (GX10 deployment) | `░░░░░░░░░░` 0/4 |  |
+| M18 | Video Providers | P4 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/4 |  |
 | M19 | Image / Keyframe Provider | P4 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/2 |  |
 | M20 | Reference Retrieval & Embeddings | P5 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/3 |  |
 | M21 | QC Engine | P6 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/3 |  |
@@ -56,14 +56,14 @@
 | M28 | Audit & Provenance | P4, P10 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/3 |  |
 | M29 | Observability | P1, P10 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/3 |  |
 | M30 | Backup & Retention | P10 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/3 |  |
-| M31 | Install & Ops Scripts | P1, P10 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/2 |  |
+| M31 | Install & Ops Scripts | P1, P10 | ⚪ NOT_STARTED | Product owner (GX10 deployment) | `░░░░░░░░░░` 0/2 |  |
 | M32 | Documentation | P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10 | 🟡 IN_PROGRESS | — | `█░░░░░░░░░` 1/8 |  |
-| M33 | Security, Privacy & Likeness Consent | P2, P10 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/3 |  |
+| M33 | Security, Privacy & Likeness Consent | P2, P10 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/6 |  |
 
 ## Active & blocked tasks
 
-- [ ] **M00** Owner sign-off on Proposed ADRs (001-007, 009, 010) — TODO
-- [ ] **M00** Answer open questions (review section 9) — TODO
+- [ ] **M00** Owner sign-off on remaining Proposed ADRs (001-003, 005-007, 009, 010) — TODO
+- [ ] **M00** Open questions remaining: revenue band, team size, throughput target, LLM preference — TODO
 - [ ] **M00** Create remote + branch protection — TODO
 - [ ] **M00** CI: lint, type-check, tests, arm64 buildx — TODO
 - [ ] **M00** pre-commit hooks (ruff, mypy, eslint, prettier) — TODO

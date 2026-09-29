@@ -83,8 +83,10 @@ tasks = [
   { title = "Module catalog + phase plan (docs/MODULES.md)", status = "DONE" },
   { title = "Status tracker + renderer", status = "DONE" },
   { title = "git init + initial commit", status = "DONE" },
-  { title = "Owner sign-off on Proposed ADRs (001-007, 009, 010)", status = "TODO" },
-  { title = "Answer open questions (review section 9)", status = "TODO" },
+  { title = "ADR-004 accepted (native pipelines)", status = "DONE" },
+  { title = "Owner sign-off on remaining Proposed ADRs (001-003, 005-007, 009, 010)", status = "TODO" },
+  { title = "Open questions answered: deployment, likeness, bring-up owner, backend (ADR-012)", status = "DONE" },
+  { title = "Open questions remaining: revenue band, team size, throughput target, LLM preference", status = "TODO" },
   { title = "Create remote + branch protection", status = "TODO" },
   { title = "CI: lint, type-check, tests, arm64 buildx", status = "TODO" },
   { title = "pre-commit hooks (ruff, mypy, eslint, prettier)", status = "TODO" },
@@ -284,7 +286,8 @@ tasks = [
   { title = "model_registry + states", status = "TODO" },
   { title = "model_licenses + admin approval gate", status = "TODO" },
   { title = "scripts/models/fetch.py: pinned revision + SHA256 + offline bundle", status = "TODO" },
-  { title = "Verify licenses for LTX-2.3, image model, QC face model", status = "TODO" },
+  { title = "Verify licenses for LTX-2.3, image model, QC face model (internal use is still commercial use)", status = "TODO" },
+  { title = "Confirm company revenue band against LTX license terms", status = "TODO" },
 ]
 
 [[modules]]
@@ -292,7 +295,7 @@ id = "M17"
 name = "AI Engine Runtime"
 phases = ["P0", "P4"]
 status = "NOT_STARTED"
-owner = ""
+owner = "Product owner (GX10 deployment)"
 tasks = [
   { title = "SPIKE: NGC PyTorch arm64 on GB10, torch.cuda smoke test", status = "TODO" },
   { title = "SPIKE: LTX-2.3 i2v one clip; record time + peak memory", status = "TODO" },
@@ -306,7 +309,6 @@ name = "Video Providers"
 phases = ["P4"]
 status = "NOT_STARTED"
 owner = ""
-blocked_by = "ADR-004 decision"
 tasks = [
   { title = "VideoProvider ABC with capabilities (ADR-006)", status = "TODO" },
   { title = "LTXProvider: i2v, t2v, first/last frame", status = "TODO" },
@@ -461,7 +463,7 @@ id = "M31"
 name = "Install & Ops Scripts"
 phases = ["P1", "P10"]
 status = "NOT_STARTED"
-owner = ""
+owner = "Product owner (GX10 deployment)"
 tasks = [
   { title = "scripts/setup/install.sh (spec 74, idempotent)", status = "TODO" },
   { title = "Offline install path", status = "TODO" },
@@ -491,7 +493,10 @@ phases = ["P2", "P10"]
 status = "NOT_STARTED"
 owner = ""
 tasks = [
-  { title = "Consent records for real-person likeness/voice", status = "TODO" },
+  { title = "Employee consent records (scope: projects, face/voice, internal/external)", status = "TODO" },
+  { title = "Consent withdrawal: block new generations, flag affected assets", status = "TODO" },
+  { title = "Treat face embeddings + voice refs as sensitive data (access audit)", status = "TODO" },
+  { title = "HR/legal review of consent form + local privacy rules", status = "TODO" },
   { title = "Offline egress test (zero external calls)", status = "TODO" },
   { title = "Threat model + security review", status = "TODO" },
 ]
