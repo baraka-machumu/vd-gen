@@ -60,14 +60,31 @@ def apply_overrides(workflow: dict[str, Any], sets: list[str]) -> dict[str, Any]
     return wf
 
 
-def wait_for(url: str, prompt_id: str, poll_s: float, timeout_s: float) -> dict[str, Any]:
-    deadline = time.monotonic() + timeout_s
+def queue_state(url: str, prompt_id: str) -> str:
+    q = http(url, "/queue")
+    if any(item[1] == prompt_id for item in q.get("queue_running", [])):
+        return "running"
+    pending = [item[1] for item in q.get("queue_pending", [])]
+    if prompt_id in pending:
+        return f"pending ({pending.index(prompt_id) + 1} of {len(pending)}, {len(q.get('queue_running', []))} running)"
+    return "finishing"
+
+
+def wait_for(url: str, prompt_id: str, poll_s: float, timeout_s: float, report_every_s: float = 30) -> dict[str, Any]:
+    start = time.monotonic()
+    deadline = start + timeout_s
+    next_report = start + report_every_s
     while time.monotonic() < deadline:
         hist = http(url, f"/history/{prompt_id}")
         if hist and prompt_id in hist:
             entry = hist[prompt_id]
             if entry.get("status", {}).get("completed") or entry.get("status", {}).get("status_str") == "error":
                 return entry
+        if time.monotonic() >= next_report:
+            avail = meminfo_kib()["MemAvailable"] / 2**20
+            print(f"  ... {time.monotonic() - start:6.0f}s  {queue_state(url, prompt_id)}  mem available {avail:.1f} GiB",
+                  flush=True)
+            next_report += report_every_s
         time.sleep(poll_s)
     raise TimeoutError(f"prompt {prompt_id} did not finish within {timeout_s}s")
 
