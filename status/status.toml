@@ -11,7 +11,7 @@ name = "Private AI Video Production Platform"
 codename = "yas-video-generator"
 target_hardware = "ASUS Ascent GX10 (NVIDIA GB10, 128 GB unified, arm64)"
 current_phase = "P0"
-updated = "2026-09-29"
+updated = "2026-09-30"
 
 # ---------------------------------------------------------------- phases
 [[phases]]
@@ -85,7 +85,7 @@ tasks = [
   { title = "git init + initial commit", status = "DONE" },
   { title = "ADR-004 accepted (native pipelines)", status = "DONE" },
   { title = "ADR-013 accepted: ComfyUI primary backend (supersedes ADR-004)", status = "DONE" },
-  { title = "Owner sign-off on remaining Proposed ADRs (001-003, 005-007, 009, 010)", status = "TODO" },
+  { title = "Owner sign-off on remaining Proposed ADRs (001-003, 005-007, 009, 010, 014)", status = "TODO" },
   { title = "Open questions answered: deployment, likeness, bring-up owner, backend (ADR-012)", status = "DONE" },
   { title = "Open questions remaining: revenue band, team size, throughput target, LLM preference", status = "TODO" },
   { title = "Create remote + branch protection", status = "TODO" },
@@ -114,7 +114,7 @@ phases = ["P0", "P1"]
 status = "IN_PROGRESS"
 owner = ""
 tasks = [
-  { title = "scripts/setup/verify_gx10.sh (spec 74 output): written, awaiting GX10 run", status = "DOING" },
+  { title = "scripts/setup/verify_gx10.sh (spec 74 output): run on gx10-67e1 2026-09-30, baseline in docs/models.md", status = "DONE" },
   { title = "Hardware probe service (uname, nvidia-smi, torch, disk, memory)", status = "TODO" },
   { title = "GET /api/v1/system/capabilities + /hardware", status = "TODO" },
   { title = "/health, /health/{database,redis,minio,gpu,models,comfyui}", status = "TODO" },
@@ -302,18 +302,19 @@ status = "IN_PROGRESS"
 owner = "Product owner (GX10 deployment)"
 tasks = [
   { title = "SPIKE: NGC PyTorch arm64 on GB10 smoke test (scripts/health/gpu_smoke.py): awaiting GX10 run", status = "DOING" },
-  { title = "SPIKE: LTX-2.3 i2v one clip, time + peak memory (scripts/spike/ltx_spike.sh): awaiting GX10 run", status = "DOING" },
-  { title = "SPIKE via existing ComfyUI on GX10 (LTX/Hunyuan/Wan installed): comfy_probe.py + comfy_run.py, awaiting run", status = "DOING" },
-  { title = "Record spike results in docs/models.md + set throughput NFR", status = "TODO" },
+  { title = "Optional: native LTX-2.3 fallback check (scripts/spike/ltx_spike.sh), not run; ComfyUI path measured instead (ADR-013)", status = "TODO" },
+  { title = "SPIKE via existing ComfyUI on GX10 (LTX/Hunyuan/Wan installed): comfy_probe.py + comfy_run.py", status = "DONE" },
+  { title = "Spike: measure HunyuanVideo + Wan i2v via comfy_run.py (same keyframe)", status = "TODO" },
+  { title = "Record spike results in docs/models.md + set throughput NFR (provisional)", status = "DONE" },
   { title = "Spike: first t2v clip reviewed; findings in docs/models.md + review/02", status = "DONE" },
   { title = "Spike: LTX-2.3 i2v 5-8 s from keyframe (export i2v workflow): 2 warm runs measured, identity drift Q7", status = "DONE" },
   { title = "Spike: i2v rerun with prompt enhancer off (same keyframe, 2 seeds): fixes Q7/Q8, see Q10", status = "DONE" },
   { title = "Spike: i2v cold run (--cold) for model-load time: ~10 s with warm page cache, peak 46.9 GiB", status = "DONE" },
   { title = "Spike (optional): cold-from-disk load time after drop_caches or reboot, GX10 idle", status = "TODO" },
-  { title = "Decide on abliterated Gemma text-encoder LoRA in production workflows (ADR)", status = "TODO" },
+  { title = "Decide on abliterated Gemma text-encoder LoRA in production workflows: ADR-014 proposed, awaiting sign-off", status = "DOING" },
   { title = "Spike: same shot with first/last frame (LTXVAddGuide): 2/2 runs hit end pose, Q15-Q17; IC-LoRA models not installed", status = "DONE" },
-  { title = "Spike: first/last-frame end-pose snap (Q16): test guide strength < 1 and pass-2 guide", status = "TODO" },
-  { title = "Install + test LTX-2.3 IC-LoRA control models (pose/depth) for R-MOTION", status = "TODO" },
+  { title = "Spike: first/last-frame end-pose snap (Q16): reviewed, accepted by product owner", status = "DONE" },
+  { title = "Install + test LTX-2.3 IC-LoRA control models (pose/depth) for R-MOTION (deferred until after P4; needs M16 license entry)", status = "TODO" },
   { title = "Record ComfyUI version + custom-node commits + model SHA256 on GX10 (pinning baseline)", status = "TODO" },
   { title = "Golden-workflow regression check for ComfyUI updates", status = "TODO" },
   { title = "Containerize ComfyUI on NGC arm64 (ADR-007, post-MVP)", status = "TODO" },

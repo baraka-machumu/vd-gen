@@ -95,5 +95,17 @@ The remaining ~20 is texture and fine detail (pass 2 re-renders the frame), not 
 | # | Finding | Severity | Response |
 |---|---|---|---|
 | Q15 | Both runs land on the target end pose with the same people, wardrobe and backpack; one continuous shot | Positive | R-ACTION first/last-frame mode is feasible on the GX10 with the installed nodes |
-| Q16 | Run 1 converges gradually (difference 45 → 33 → 24 → 20 over frames 150–200); run 2 stays far until frame ~185, then closes in the last ~0.6 s (45 → 20), which risks a visible "snap" into the end pose | Medium | Review run 2 at full speed. Mitigations to test: guide strength < 1.0, the guide in pass 2 as well, and prompts that time the action ("…by the end of the shot") |
+| Q16 (**accepted** by product owner) | Run 1 converges gradually (difference 45 → 33 → 24 → 20 over frames 150–200); run 2 stays far until frame ~185, then closes in the last ~0.6 s (45 → 20), which risks a visible "snap" into the end pose | Medium | Review run 2 at full speed. Mitigations to test: guide strength < 1.0, the guide in pass 2 as well, and prompts that time the action ("…by the end of the shot") |
 | Q17 | Run 2: the left man looks away at ~4 s, though the prompt says he keeps looking at his phone | Low | Normal seed variance; QC/regeneration handles it |
+
+## Throughput budget (provisional NFR, 2026-09-30)
+
+Set from the P0 measurements above (review 01 M3, open question 4). To be replaced by measured per-episode numbers after P4.
+
+| Metric | Baseline (measured) | Budget | Alert (regression) |
+|---|---|---|---|
+| LTX-2.3 i2v / first-last-frame, 1280×704, 8 s shot, warm | 11.6–12.5 s compute per video-second | **≤ 15 s** per video-second (≤ 2 min per 8 s shot) | > 20 s per video-second |
+| Same, ComfyUI cold (models unloaded, page cache warm) | 13.4 s per video-second | ≤ 15 s + 30 s model load | > 60 s model load |
+| Peak unified memory, LTX-2.3 i2v incl. models | 46.9 GiB | ≤ 50 GiB | > 55 GiB |
+
+**Episode estimate (video pass only):** 10 min of video × 12 s × ~1.75 regeneration factor ≈ **3.5–4 h**. Keyframe generation, QC, audio and the final 1080p/4K upscale come on top and are not yet measured.

@@ -19,6 +19,7 @@ When an ADR changes a module's scope, update [`MODULES.md`](MODULES.md) and [`..
 | 011 | Status tracking lives in `status/status.toml` | Accepted (2026-09-29) | — |
 | 012 | Deployment scope: private office network, employee likenesses | Accepted (2026-09-29) | M01, M06, M25, M33 |
 | 013 | ComfyUI is the primary video execution backend | Accepted (2026-09-30) | M15, M17, M18, M19, M28 |
+| 014 | No in-workflow prompt enhancement; no abliterated models | Proposed | M10, M11, M16, M18 |
 
 ---
 
@@ -125,3 +126,15 @@ When an ADR changes a module's scope, update [`MODULES.md`](MODULES.md) and [`..
 - Hunyuan and Wan become reachable through the same adapter. They are still gated by M16 license approval and per-model benchmarks.
 - The ComfyUI on the GX10 is now production infrastructure. Ad-hoc use of it (manual experiments in the web UI) competes with platform jobs and can evict loaded models. Once the platform is live, manual use must be scheduled or moved to a separate instance.
 - We inherit ComfyUI's release cadence and custom-node quality, which is why the pinning and golden-workflow checks above are mandatory.
+
+## ADR-014: No in-workflow prompt enhancement; no abliterated models
+
+**Context.** The ComfyUI LTX-2.3 i2v template contains a prompt enhancer (`TextGenerateLTX2Prompt`) that rewrites the user prompt with Gemma 3 12B, and loads `gemma-3-12b-it-abliterated_lora` for it. "Abliterated" means the model's refusal behaviour was deliberately removed. It is a community derivative, not an official Gemma release. In the P0 spike ([`models.md`](models.md) Q7, Q8, Q10) the enhancer caused identity and wardrobe drift and implicit cuts; with it off, 3/3 seeds kept the keyframe for 8 s at no speed cost. The LoRA feeds only the enhancer, so with the enhancer off it is unused.
+**Decision.**
+- Production ComfyUI workflow templates (`workflows/<provider>/`) **do not contain** LLM prompt-rewrite nodes. The prompt the platform stores for a generation attempt is exactly the prompt that was encoded (spec §8).
+- Prompt enhancement, where wanted, is done by the **Prompt Engine (M10)** through the platform's own LLM provider (M11): versioned, stored per attempt, and subject to the R-TEXT/R-SHOT prompt rules (review 02).
+- **Abliterated or otherwise safety-stripped models** (LLMs, text encoders, LoRAs) are not approved in the model registry (M16). The platform handles employee likenesses (ADR-012), so the safe-by-default behaviour of the base models is kept.
+- The template adapter (M18) rejects a workflow that contains a node class on a deny-list (initially `TextGenerateLTX2Prompt`) or references a model file not approved in M16.
+**Consequences.**
+- The enhancer's possible benefit (richer prompts) must come from M10 prompt templates; P0 results suggest the plain prompt with explicit appearance anchors is better for i2v anyway.
+- Manual experiments in the ComfyUI UI may still use the template as shipped; the rule applies to what the platform submits.
