@@ -1,0 +1,26 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  # Repo-wide checks: the same hooks developers run locally (.pre-commit-config.yaml):
+  # file hygiene, LF endings, ruff lint + format, mypy on scripts, STATUS.md freshness (ADR-011).
+  repo-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pre-commit
+      - run: pre-commit run --all-files --show-diff-on-failure
+
+  # Backend lint/type/test job: added with M03 (backend core).
+  # Frontend eslint/tsc/test job: added with M27.
+  # arm64 buildx job: added with M01, when the first Dockerfiles exist.

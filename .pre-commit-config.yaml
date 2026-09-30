@@ -1,0 +1,43 @@
+# Install once:  pip install pre-commit && pre-commit install
+# Run on all files:  pre-commit run --all-files
+# eslint/prettier hooks are added with the frontend (M27).
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+        args: ["--maxkb=2048"]
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: check-yaml
+      - id: check-json
+        exclude: ^storage/
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+        args: ["--fix=lf"]
+        exclude: \.(bat|ps1)$
+      - id: trailing-whitespace
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.9
+    hooks:
+      - id: ruff-check
+        args: ["--fix"]
+      - id: ruff-format
+
+  - repo: local
+    hooks:
+      - id: status-md-fresh
+        name: status/STATUS.md is regenerated from status.toml (ADR-011)
+        entry: python scripts/status/render_status.py --check
+        language: python
+        files: ^status/
+        pass_filenames: false
+      - id: mypy-scripts
+        name: mypy (scripts, stdlib only)
+        entry: mypy --config-file mypy.ini scripts/spike scripts/status scripts/health
+        language: python
+        additional_dependencies: ["mypy==2.3.1"]
+        files: ^scripts/.*\.py$
+        pass_filenames: false

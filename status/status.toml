@@ -89,8 +89,9 @@ tasks = [
   { title = "Open questions answered: deployment, likeness, bring-up owner, backend (ADR-012)", status = "DONE" },
   { title = "Open questions remaining: revenue band, team size, throughput target, LLM preference", status = "TODO" },
   { title = "Create remote + branch protection", status = "TODO" },
-  { title = "CI: lint, type-check, tests, arm64 buildx", status = "TODO" },
-  { title = "pre-commit hooks (ruff, mypy, eslint, prettier)", status = "TODO" },
+  { title = "CI: repo checks (pre-commit: hygiene, ruff, mypy scripts, STATUS.md) in .github/workflows/ci.yml", status = "DONE" },
+  { title = "CI: backend tests job (with M03), frontend job (with M27), arm64 buildx (with M01 Dockerfiles)", status = "TODO" },
+  { title = "pre-commit hooks (ruff, mypy, hygiene, STATUS.md check); eslint/prettier added with M27", status = "DONE" },
 ]
 
 [[modules]]

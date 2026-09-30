@@ -42,3 +42,15 @@ status/      status.toml (source of truth) + generated STATUS.md
 python scripts/status/render_status.py          # validates + regenerates status/STATUS.md
 python scripts/status/render_status.py --check  # CI: fails if STATUS.md is stale
 ```
+
+## Developer setup
+
+```bash
+python -m venv .venv
+.venv/Scripts/pip install pre-commit    # Linux/macOS: .venv/bin/pip
+.venv/Scripts/pre-commit install         # runs the hooks on every commit
+.venv/Scripts/pre-commit run --all-files # the same checks CI runs (.github/workflows/ci.yml)
+```
+
+Python style: `ruff.toml` (lint + format, 120 columns, Python 3.12 target). Type checking: `mypy.ini` for `scripts/`;
+`backend/` and `ai-engine/` carry their own mypy settings.

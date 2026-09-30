@@ -40,10 +40,17 @@ def nvidia_sample() -> dict[str, float | None] | None:
         return None
     fields = "utilization.gpu,memory.used,power.draw,temperature.gpu"
     try:
-        out = subprocess.run(
-            ["nvidia-smi", f"--query-gpu={fields}", "--format=csv,noheader,nounits"],
-            capture_output=True, text=True, timeout=5, check=True,
-        ).stdout.strip().splitlines()[0]
+        out = (
+            subprocess.run(
+                ["nvidia-smi", f"--query-gpu={fields}", "--format=csv,noheader,nounits"],
+                capture_output=True,
+                text=True,
+                timeout=5,
+                check=True,
+            )
+            .stdout.strip()
+            .splitlines()[0]
+        )
     except (subprocess.SubprocessError, IndexError, OSError):
         return None
 
@@ -79,9 +86,10 @@ class Sampler(threading.Thread):
             self.stop_event.wait(self.interval)
 
 
-def _peak(samples: list[dict[str, float | None]], key: str) -> float | None:
-    vals = [s[key] for s in samples if s.get(key) is not None]
-    return max(vals) if vals else None  # type: ignore[type-var]
+def peak(samples: list[dict[str, float | None]], key: str) -> float | None:
+    """Largest non-missing value of `key` across the samples, or None if there is none."""
+    vals = [v for s in samples if (v := s.get(key)) is not None]
+    return max(vals) if vals else None
 
 
 def main() -> int:
@@ -98,13 +106,14 @@ def main() -> int:
 
     before = meminfo_kib()
     sampler = Sampler(args.interval)
-    started = dt.datetime.now(dt.timezone.utc)
+    started = dt.datetime.now(dt.UTC)
     sampler.start()
     t0 = time.monotonic()
 
     log_fh = args.log.open("w", encoding="utf-8") if args.log else None
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
-    assert proc.stdout is not None
+    if proc.stdout is None:  # cannot happen with stdout=PIPE; narrows the type
+        raise RuntimeError("subprocess stdout pipe missing")
     for line in proc.stdout:  # tee to console + log
         sys.stdout.write(line)
         if log_fh:
@@ -134,18 +143,20 @@ def main() -> int:
         },
         "gpu": {
             "samples": len(sampler.gpu_samples),
-            "peak_util_pct": _peak(sampler.gpu_samples, "util_pct"),
-            "peak_mem_used_mib": _peak(sampler.gpu_samples, "mem_used_mib"),
-            "peak_power_w": _peak(sampler.gpu_samples, "power_w"),
-            "peak_temp_c": _peak(sampler.gpu_samples, "temp_c"),
+            "peak_util_pct": peak(sampler.gpu_samples, "util_pct"),
+            "peak_mem_used_mib": peak(sampler.gpu_samples, "mem_used_mib"),
+            "peak_power_w": peak(sampler.gpu_samples, "power_w"),
+            "peak_temp_c": peak(sampler.gpu_samples, "temp_c"),
         },
         "host": {"machine": platform.machine(), "node": platform.node()},
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(report, indent=2), encoding="utf-8")
     m = report["memory"]
-    print(f"\n[measure] {args.label}: exit={rc} wall={report['wall_time_s']}s "
-          f"peak_mem_delta={m['peak_used_delta_gib']} GiB (of {m['total_gib']} GiB) -> {args.out}")
+    print(
+        f"\n[measure] {args.label}: exit={rc} wall={report['wall_time_s']}s "
+        f"peak_mem_delta={m['peak_used_delta_gib']} GiB (of {m['total_gib']} GiB) -> {args.out}"
+    )
     return rc
 
 

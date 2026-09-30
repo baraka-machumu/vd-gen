@@ -20,10 +20,18 @@ import json
 from pathlib import Path
 
 EXPECTED = {
-    "269": "LoadImage", "320:290": "ResizeImageMaskNode", "320:286": "ResizeImagesByLongerEdge",
-    "320:289": "LTXVPreprocess", "320:296": "LTXVImgToVideoInplace", "320:304": "LTXVConditioning",
-    "320:316": "CheckpointLoaderSimple", "320:318": "LTXVConcatAVLatent", "320:314": "CFGGuider",
-    "320:284": "LTXVCropGuides", "320:287": "LTXVLatentUpsampler", "320:319": "PrimitiveStringMultiline",
+    "269": "LoadImage",
+    "320:290": "ResizeImageMaskNode",
+    "320:286": "ResizeImagesByLongerEdge",
+    "320:289": "LTXVPreprocess",
+    "320:296": "LTXVImgToVideoInplace",
+    "320:304": "LTXVConditioning",
+    "320:316": "CheckpointLoaderSimple",
+    "320:318": "LTXVConcatAVLatent",
+    "320:314": "CFGGuider",
+    "320:284": "LTXVCropGuides",
+    "320:287": "LTXVLatentUpsampler",
+    "320:319": "PrimitiveStringMultiline",
     "320:328": "PrimitiveBoolean",
 }
 
@@ -47,8 +55,13 @@ def build(wf: dict, last_image: str, prompt: str | None) -> dict:
     wf["320:904"] = {
         "class_type": "LTXVAddGuide",
         "inputs": {
-            "positive": ["320:304", 0], "negative": ["320:304", 1], "vae": ["320:316", 2],
-            "latent": ["320:296", 0], "image": ["320:903", 0], "frame_idx": -1, "strength": 1.0,
+            "positive": ["320:304", 0],
+            "negative": ["320:304", 1],
+            "vae": ["320:316", 2],
+            "latent": ["320:296", 0],
+            "image": ["320:903", 0],
+            "frame_idx": -1,
+            "strength": 1.0,
         },
         "_meta": {"title": "Last Frame Guide"},
     }

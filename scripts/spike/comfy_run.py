@@ -36,15 +36,16 @@ from pathlib import Path
 from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from measure import Sampler, meminfo_kib  # noqa: E402
+from measure import Sampler, meminfo_kib, peak
 
 ROOT = Path(__file__).resolve().parents[2]
 
 
 def http(url: str, path: str, payload: dict[str, Any] | None = None, timeout: float = 30) -> Any:
     data = json.dumps(payload).encode("utf-8") if payload is not None else None
-    req = urllib.request.Request(url.rstrip("/") + path, data=data,
-                                 headers={"Content-Type": "application/json"} if data else {})
+    req = urllib.request.Request(
+        url.rstrip("/") + path, data=data, headers={"Content-Type": "application/json"} if data else {}
+    )
     with urllib.request.urlopen(req, timeout=timeout) as resp:
         body = resp.read()
     return json.loads(body) if body else None
@@ -68,11 +69,37 @@ def apply_overrides(workflow: dict[str, Any], sets: list[str]) -> dict[str, Any]
 SEED_INPUTS = ("seed", "noise_seed")
 # Inputs worth recording next to every timing (resolution, length, steps, models, ...).
 SUMMARY_INPUTS = (
-    "width", "height", "length", "num_frames", "frames", "frame_rate", "fps", "batch_size",
-    "steps", "cfg", "sampler_name", "scheduler", "denoise", "strength",
-    "ckpt_name", "unet_name", "model_name", "clip_name", "clip_name1", "clip_name2", "vae_name",
-    "lora_name", "strength_model", "upscale_model", "weight_dtype", "text_encoder", "image", "text", "sigmas",
-) + SEED_INPUTS
+    "width",
+    "height",
+    "length",
+    "num_frames",
+    "frames",
+    "frame_rate",
+    "fps",
+    "batch_size",
+    "steps",
+    "cfg",
+    "sampler_name",
+    "scheduler",
+    "denoise",
+    "strength",
+    "ckpt_name",
+    "unet_name",
+    "model_name",
+    "clip_name",
+    "clip_name1",
+    "clip_name2",
+    "vae_name",
+    "lora_name",
+    "strength_model",
+    "upscale_model",
+    "weight_dtype",
+    "text_encoder",
+    "image",
+    "text",
+    "sigmas",
+    *SEED_INPUTS,
+)
 # Primitive nodes hold UI-level settings (width, duration, prompt, feature switches) under "value";
 # they are only meaningful together with the node title, so both are recorded.
 PRIMITIVE_PREFIX = "Primitive"
@@ -86,7 +113,7 @@ def reseed(workflow: dict[str, Any], pinned: set[str]) -> dict[str, int]:
         for name in SEED_INPUTS:
             key = f"{node_id}.{name}"
             if name in inputs and not isinstance(inputs[name], list) and key not in pinned:
-                inputs[name] = random.randint(0, 2**48)
+                inputs[name] = random.randint(0, 2**48)  # noqa: S311 - diffusion seed, not a secret
                 used[key] = inputs[name]
     return used
 
@@ -99,8 +126,14 @@ def summarize(workflow: dict[str, Any]) -> list[dict[str, Any]]:
         params = {k: v for k, v in node.get("inputs", {}).items() if k in wanted and not isinstance(v, list)}
         if params:
             title = node.get("_meta", {}).get("title")
-            rows.append({"node": node_id, "class_type": node["class_type"],
-                         **({"title": title} if title and title != node["class_type"] else {}), **params})
+            rows.append(
+                {
+                    "node": node_id,
+                    "class_type": node["class_type"],
+                    **({"title": title} if title and title != node["class_type"] else {}),
+                    **params,
+                }
+            )
     return rows
 
 
@@ -143,8 +176,10 @@ def wait_for(url: str, prompt_id: str, poll_s: float, timeout_s: float, report_e
                 return entry
         if time.monotonic() >= next_report:
             avail = meminfo_kib()["MemAvailable"] / 2**20
-            print(f"  ... {time.monotonic() - start:6.0f}s  {queue_state(url, prompt_id)}  mem available {avail:.1f} GiB",
-                  flush=True)
+            print(
+                f"  ... {time.monotonic() - start:6.0f}s  {queue_state(url, prompt_id)}  mem available {avail:.1f} GiB",
+                flush=True,
+            )
             next_report += report_every_s
         time.sleep(poll_s)
     raise TimeoutError(f"prompt {prompt_id} did not finish within {timeout_s}s")
@@ -213,7 +248,7 @@ def main() -> int:
         http(args.url, "/free", {"unload_models": True, "free_memory": True})
         time.sleep(5)
 
-    ts = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    ts = dt.datetime.now(dt.UTC).strftime("%Y%m%dT%H%M%SZ")
     args.report_dir.mkdir(parents=True, exist_ok=True)
     (args.report_dir / f"{args.label}-{ts}.workflow.json").write_bytes(wf_bytes)
 
@@ -250,17 +285,20 @@ def main() -> int:
             "available_before_gib": round(before / 2**20, 2),
             "peak_used_delta_gib": round((before - min_avail) / 2**20, 2),
             "min_available_gib": round(min_avail / 2**20, 2),
-            "gpu_peak_util_pct": max((s["util_pct"] for s in sampler.gpu_samples if s.get("util_pct") is not None), default=None),
-            "gpu_peak_power_w": max((s["power_w"] for s in sampler.gpu_samples if s.get("power_w") is not None), default=None),
+            "gpu_peak_util_pct": peak(sampler.gpu_samples, "util_pct"),
+            "gpu_peak_power_w": peak(sampler.gpu_samples, "power_w"),
             "outputs": outputs,
             "text_outputs": text_outputs(entry) if entry else {},
             "error": error,
         }
         runs.append(run)
         rc = rc or (1 if error else 0)
-        print(f"[run {i}] {'OK' if not error else 'ERROR'} wall={run['wall_time_s']}s exec={run['comfy_exec_time_s']}s "
-              f"peak_mem_delta={run['peak_used_delta_gib']} GiB outputs={len(outputs)} "
-              f"cached_nodes={run['cached_nodes']}/{len(workflow)}", flush=True)
+        print(
+            f"[run {i}] {'OK' if not error else 'ERROR'} wall={run['wall_time_s']}s exec={run['comfy_exec_time_s']}s "
+            f"peak_mem_delta={run['peak_used_delta_gib']} GiB outputs={len(outputs)} "
+            f"cached_nodes={run['cached_nodes']}/{len(workflow)}",
+            flush=True,
+        )
         if run["served_from_cache"]:
             print(f"[run {i}] WARNING: every node was served from ComfyUI's cache; this timing is NOT a generation.")
 

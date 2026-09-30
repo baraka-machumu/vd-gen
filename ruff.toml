@@ -1,0 +1,26 @@
+# Shared lint/format rules for all Python in the repo (backend/, ai-engine/, contracts/, scripts/).
+target-version = "py312"
+line-length = 120
+extend-exclude = ["storage", "outputs", "renders"]
+
+[lint]
+select = [
+    "E", "W",  # pycodestyle
+    "F",       # pyflakes
+    "I",       # isort
+    "B",       # bugbear
+    "UP",      # pyupgrade
+    "S",       # bandit (security)
+    "SIM",     # simplify
+    "RUF",     # ruff-specific
+]
+ignore = [
+    "S603", "S607",  # subprocess with trusted, fixed commands (probe/verify scripts)
+    "S310",          # urllib to configured local services (ComfyUI URL comes from config)
+]
+
+[lint.per-file-ignores]
+"**/tests/**" = ["S101"]  # assert is how pytest works
+
+[format]
+quote-style = "double"

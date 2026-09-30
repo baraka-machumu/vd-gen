@@ -33,7 +33,7 @@ def run(alloc_gb: int) -> dict[str, Any]:
     try:
         import torch
         import torch.nn.functional as F
-    except Exception as exc:  # noqa: BLE001 - report any import failure verbatim
+    except Exception as exc:
         r["errors"].append(f"import torch failed: {exc!r}")
         return r
 
@@ -52,7 +52,9 @@ def run(alloc_gb: int) -> dict[str, Any]:
     r["arch_list"] = torch.cuda.get_arch_list()
     # A build supports the device if it has SASS for sm_XY, or PTX (compute_XY) at or below it for JIT.
     sass = f"sm_{major}{minor}"
-    ptx_ok = any(a.startswith("compute_") and int(a.split("_")[1].rstrip("af")) <= major * 10 + minor for a in r["arch_list"])
+    ptx_ok = any(
+        a.startswith("compute_") and int(a.split("_")[1].rstrip("af")) <= major * 10 + minor for a in r["arch_list"]
+    )
     r["native_kernels_for_device"] = sass in r["arch_list"] or f"{sass}a" in r["arch_list"]
     r["ptx_fallback_available"] = ptx_ok
     free, total = torch.cuda.mem_get_info(0)
@@ -63,7 +65,7 @@ def run(alloc_gb: int) -> dict[str, Any]:
         n = 8192
         a = torch.randn(n, n, device=dev, dtype=torch.bfloat16)
         b = torch.randn(n, n, device=dev, dtype=torch.bfloat16)
-        ref = (a[:256].float() @ b.float())
+        ref = a[:256].float() @ b.float()
         got = (a @ b)[:256].float()
         rel_err = ((got - ref).abs().max() / ref.abs().max()).item()
         for _ in range(3):
@@ -79,7 +81,7 @@ def run(alloc_gb: int) -> dict[str, Any]:
         r["matmul_bf16_rel_err"] = round(rel_err, 5)
         r["matmul_ok"] = rel_err < 0.05
         del a, b, ref, got
-    except Exception:  # noqa: BLE001
+    except Exception:
         r["matmul_ok"] = False
         r["errors"].append("bf16 matmul failed:\n" + traceback.format_exc())
 
@@ -103,10 +105,10 @@ def run(alloc_gb: int) -> dict[str, Any]:
                     F.scaled_dot_product_attention(q, q, q)
                 torch.cuda.synchronize()
                 r["sdpa_backends_ok"].append(name)
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 r["sdpa_backends_failed"][name] = str(exc).splitlines()[0][:200]
         del q
-    except Exception:  # noqa: BLE001
+    except Exception:
         r["errors"].append("SDPA check failed:\n" + traceback.format_exc())
 
     # Unified-memory allocation in 1 GiB chunks.
@@ -116,7 +118,7 @@ def run(alloc_gb: int) -> dict[str, Any]:
             chunks.append(torch.empty(2**30, dtype=torch.uint8, device=dev).fill_(1))
         torch.cuda.synchronize()
         r["alloc_gib_ok"] = alloc_gb
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         r["alloc_gib_ok"] = len(chunks)
         r["errors"].append(f"allocation stopped at {len(chunks)} GiB: {exc!r}")
     finally:

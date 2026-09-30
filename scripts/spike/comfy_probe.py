@@ -43,8 +43,11 @@ def main() -> int:
     try:
         stats = get(args.url, "/system_stats", timeout=10)
     except (urllib.error.URLError, TimeoutError) as exc:
-        print(f"Cannot reach ComfyUI at {args.url}: {exc}\n"
-              "Check the port with: ss -ltnp | grep -i python   (or docker ps for a containerised ComfyUI)", file=sys.stderr)
+        print(
+            f"Cannot reach ComfyUI at {args.url}: {exc}\n"
+            "Check the port with: ss -ltnp | grep -i python   (or docker ps for a containerised ComfyUI)",
+            file=sys.stderr,
+        )
         return 1
 
     # Model folders -> files. /models exists on current ComfyUI; older builds lack it.
@@ -67,7 +70,7 @@ def main() -> int:
 
     queue = try_get(args.url, "/queue")
     report = {
-        "timestamp_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
+        "timestamp_utc": dt.datetime.now(dt.UTC).isoformat(),
         "url": args.url,
         "system_stats": stats,
         "models": models,
@@ -81,7 +84,7 @@ def main() -> int:
     }
 
     args.report_dir.mkdir(parents=True, exist_ok=True)
-    ts = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    ts = dt.datetime.now(dt.UTC).strftime("%Y%m%dT%H%M%SZ")
     out = args.report_dir / f"comfy_probe-{ts}.json"
     out.write_text(json.dumps(report, indent=2), encoding="utf-8")
     if isinstance(object_info, dict) and "_error" not in object_info:
@@ -89,11 +92,15 @@ def main() -> int:
 
     # Console summary.
     system = stats.get("system", {})
-    print(f"ComfyUI {system.get('comfyui_version', '?')} | Python {str(system.get('python_version', '?')).split()[0]} "
-          f"| PyTorch {system.get('pytorch_version', '?')}")
+    print(
+        f"ComfyUI {system.get('comfyui_version', '?')} | Python {str(system.get('python_version', '?')).split()[0]} "
+        f"| PyTorch {system.get('pytorch_version', '?')}"
+    )
     for d in stats.get("devices", []):
-        print(f"Device: {d.get('name')}  vram_total={d.get('vram_total', 0) / 2**30:.1f} GiB  "
-              f"vram_free={d.get('vram_free', 0) / 2**30:.1f} GiB")
+        print(
+            f"Device: {d.get('name')}  vram_total={d.get('vram_total', 0) / 2**30:.1f} GiB  "
+            f"vram_free={d.get('vram_free', 0) / 2**30:.1f} GiB"
+        )
     print(f"Queue: running={report['queue']['running']} pending={report['queue']['pending']}")
     print("\nModels:")
     for folder, files in models.items():

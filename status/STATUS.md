@@ -3,13 +3,13 @@
 
 **Current phase:** P0 · **Updated:** 2026-09-30 · **Target:** ASUS Ascent GX10 (NVIDIA GB10, 128 GB unified, arm64)
 
-**Tasks:** `███░░░░░░░░░░░░░░░░░` 20/150 · **Definition of Done (spec §83):** `░░░░░░░░░░░░░░░░░░░░` 0/33
+**Tasks:** `███░░░░░░░░░░░░░░░░░` 22/151 · **Definition of Done (spec §83):** `░░░░░░░░░░░░░░░░░░░░` 0/33
 
 ## Phases
 
 | Phase | Name | Status | Modules | Tasks |
 |---|---|---|---|---|
-| **P0** ◀ | Foundations & GX10 spike | 🟡 IN_PROGRESS | M00, M02, M17, M32 | `████░░░░░░` 20/45 |
+| **P0** ◀ | Foundations & GX10 spike | 🟡 IN_PROGRESS | M00, M02, M17, M32 | `█████░░░░░` 22/46 |
 | **P1** | Infrastructure | ⚪ NOT_STARTED | M01, M02, M03, M04, M14, M27, M29, M31, M32 | `█░░░░░░░░░` 3/40 |
 | **P2** | Project system | ⚪ NOT_STARTED | M05, M06, M07, M08, M09, M27, M32, M33 | `█░░░░░░░░░` 2/36 |
 | **P3** | AI Director | ⚪ NOT_STARTED | M08, M10, M11, M12, M13, M14, M27, M32 | `█░░░░░░░░░` 2/34 |
@@ -25,7 +25,7 @@
 
 | ID | Module | Phases | Status | Owner | Progress | Blocked by |
 |---|---|---|---|---|---|---|
-| M00 | Repository, governance & CI | P0 | 🟡 IN_PROGRESS | — | `██████░░░░` 9/14 |  |
+| M00 | Repository, governance & CI | P0 | 🟡 IN_PROGRESS | — | `███████░░░` 11/15 |  |
 | M01 | Infrastructure & Compose | P1 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/5 |  |
 | M02 | Hardware detection & System API | P0, P1 | 🟡 IN_PROGRESS | — | `██░░░░░░░░` 1/4 |  |
 | M03 | Backend core | P1 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/5 |  |
@@ -65,8 +65,7 @@
 - [ ] **M00** Owner sign-off on remaining Proposed ADRs (001-003, 005-007, 009, 010, 014) — TODO
 - [ ] **M00** Open questions remaining: revenue band, team size, throughput target, LLM preference — TODO
 - [ ] **M00** Create remote + branch protection — TODO
-- [ ] **M00** CI: lint, type-check, tests, arm64 buildx — TODO
-- [ ] **M00** pre-commit hooks (ruff, mypy, eslint, prettier) — TODO
+- [ ] **M00** CI: backend tests job (with M03), frontend job (with M27), arm64 buildx (with M01 Dockerfiles) — TODO
 - [ ] **M02** Hardware probe service (uname, nvidia-smi, torch, disk, memory) — TODO
 - [ ] **M02** GET /api/v1/system/capabilities + /hardware — TODO
 - [ ] **M02** /health, /health/{database,redis,minio,gpu,models,comfyui} — TODO
