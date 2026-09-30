@@ -1,0 +1,72 @@
+[project]
+name = "yas-backend"
+version = "0.1.0"
+description = "Control plane (FastAPI) of the private AI video production platform"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.5",
+    "sqlalchemy[asyncio]>=2.0.35",
+    "asyncpg>=0.30",
+    "alembic>=1.14",
+    "httpx>=0.28",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "mypy>=1.13",
+    "ruff>=0.8",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.ruff]
+extend = "../ruff.toml"
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+# All outbound HTTP must go through the egress guard (spec §38, app/core/egress.py).
+"httpx.AsyncClient".msg = "Use app.core.egress.create_http_client() so the egress policy applies."
+"httpx.Client".msg = "Use app.core.egress.create_http_client() so the egress policy applies."
+"requests".msg = "Use app.core.egress.create_http_client()."
+"urllib.request".msg = "Use app.core.egress.create_http_client()."
+"aiohttp".msg = "Use app.core.egress.create_http_client()."
+
+[tool.ruff.lint]
+extend-select = ["TID251"]
+
+[tool.ruff.lint.isort]
+# The local alembic/ folder holds migrations; the import is the alembic package.
+known-third-party = ["alembic"]
+
+[tool.ruff.lint.per-file-ignores]
+"app/core/egress.py" = ["TID251"]
+"tests/**" = ["S101", "S105", "S106", "TID251"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["asyncpg.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+markers = [
+    "integration: needs a real PostgreSQL (TEST_DATABASE_URL); skipped otherwise",
+    "gx10: runs only on the GX10 device",
+]
+addopts = "-ra --strict-markers"

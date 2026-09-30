@@ -22,7 +22,7 @@ status = "IN_PROGRESS"
 [[phases]]
 id = "P1"
 name = "Infrastructure"
-status = "NOT_STARTED"
+status = "IN_PROGRESS"
 
 [[phases]]
 id = "P2"
@@ -88,9 +88,11 @@ tasks = [
   { title = "Owner sign-off on remaining Proposed ADRs (001-003, 005-007, 009, 010, 014)", status = "TODO" },
   { title = "Open questions answered: deployment, likeness, bring-up owner, backend (ADR-012)", status = "DONE" },
   { title = "Open questions remaining: revenue band, team size, throughput target, LLM preference", status = "TODO" },
-  { title = "Create remote + branch protection", status = "TODO" },
+  { title = "Create remote: github.com/baraka-machumu/vd-gen (private), main pushed 2026-09-30", status = "DONE" },
+  { title = "Branch protection on main (require repo-checks + backend CI, PR reviews)", status = "TODO" },
   { title = "CI: repo checks (pre-commit: hygiene, ruff, mypy scripts, STATUS.md) in .github/workflows/ci.yml", status = "DONE" },
-  { title = "CI: backend tests job (with M03), frontend job (with M27), arm64 buildx (with M01 Dockerfiles)", status = "TODO" },
+  { title = "CI: backend job (mypy strict, pytest incl. PostgreSQL+pgvector service)", status = "DONE" },
+  { title = "CI: frontend job (with M27), arm64 buildx (with M01 Dockerfiles)", status = "TODO" },
   { title = "pre-commit hooks (ruff, mypy, hygiene, STATUS.md check); eslint/prettier added with M27", status = "DONE" },
 ]
 
@@ -98,14 +100,14 @@ tasks = [
 id = "M01"
 name = "Infrastructure & Compose"
 phases = ["P1"]
-status = "NOT_STARTED"
+status = "IN_PROGRESS"
 owner = ""
 tasks = [
   { title = "docker-compose.yml: postgres+pgvector, redis, minio, api, worker, scheduler, frontend, nginx", status = "TODO" },
   { title = "Compose profiles: gpu (ai-engine, llm), monitoring", status = "TODO" },
   { title = "Multi-arch Dockerfiles (arm64 required)", status = "TODO" },
   { title = "nginx: private routing + /media auth_request (ADR-010)", status = "TODO" },
-  { title = ".env.example (amended spec 55)", status = "TODO" },
+  { title = ".env.example (amended spec 55), validated by a unit test", status = "DONE" },
 ]
 
 [[modules]]
@@ -125,14 +127,14 @@ tasks = [
 id = "M03"
 name = "Backend core"
 phases = ["P1"]
-status = "NOT_STARTED"
+status = "IN_REVIEW"
 owner = ""
 tasks = [
-  { title = "FastAPI app skeleton + pydantic-settings", status = "TODO" },
-  { title = "Structured JSON logging + correlation IDs", status = "TODO" },
-  { title = "SQLAlchemy 2 async + Alembic baseline", status = "TODO" },
-  { title = "Error model + exception handlers", status = "TODO" },
-  { title = "Egress guard (NETWORK_MODE / ENABLE_EXTERNAL_APIS)", status = "TODO" },
+  { title = "FastAPI app skeleton + pydantic-settings", status = "DONE" },
+  { title = "Structured JSON logging + correlation IDs", status = "DONE" },
+  { title = "SQLAlchemy 2 async + Alembic baseline (pgvector); integration-tested on PostgreSQL 17", status = "DONE" },
+  { title = "Error model + exception handlers", status = "DONE" },
+  { title = "Egress guard (NETWORK_MODE / ENABLE_EXTERNAL_APIS / ALLOWED_EXTERNAL_HOSTS), lint-enforced", status = "DONE" },
 ]
 
 [[modules]]

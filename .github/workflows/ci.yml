@@ -21,6 +21,28 @@ jobs:
       - run: pip install pre-commit
       - run: pre-commit run --all-files --show-diff-on-failure
 
-  # Backend lint/type/test job: added with M03 (backend core).
+  # Backend: strict mypy, unit + API tests, and integration tests against PostgreSQL with pgvector.
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: pgvector/pgvector:pg17
+        env:
+          POSTGRES_PASSWORD: test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 2s --health-timeout 5s --health-retries 20
+    env:
+      TEST_DATABASE_URL: postgresql://postgres:test@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --locked --python 3.12
+      - run: uv run mypy app tests alembic
+      - run: uv run pytest
+
   # Frontend eslint/tsc/test job: added with M27.
   # arm64 buildx job: added with M01, when the first Dockerfiles exist.
