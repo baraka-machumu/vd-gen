@@ -84,6 +84,7 @@ tasks = [
   { title = "Status tracker + renderer", status = "DONE" },
   { title = "git init + initial commit", status = "DONE" },
   { title = "ADR-004 accepted (native pipelines)", status = "DONE" },
+  { title = "ADR-013 accepted: ComfyUI primary backend (supersedes ADR-004)", status = "DONE" },
   { title = "Owner sign-off on remaining Proposed ADRs (001-003, 005-007, 009, 010)", status = "TODO" },
   { title = "Open questions answered: deployment, likeness, bring-up owner, backend (ADR-012)", status = "DONE" },
   { title = "Open questions remaining: revenue band, team size, throughput target, LLM preference", status = "TODO" },
@@ -307,8 +308,10 @@ tasks = [
   { title = "Spike: first t2v clip reviewed; findings in docs/models.md + review/02", status = "DONE" },
   { title = "Spike: LTX-2.3 i2v 5-8 s from keyframe (export i2v workflow)", status = "TODO" },
   { title = "Spike: same shot with first/last frame; check IC-LoRA availability in ComfyUI", status = "TODO" },
-  { title = "ai-engine image (ADR-007) + GPU job loop", status = "TODO" },
-  { title = "Model load/unload with measured memory + cooperative cancel", status = "TODO" },
+  { title = "Record ComfyUI version + custom-node commits + model SHA256 on GX10 (pinning baseline)", status = "TODO" },
+  { title = "Golden-workflow regression check for ComfyUI updates", status = "TODO" },
+  { title = "Containerize ComfyUI on NGC arm64 (ADR-007, post-MVP)", status = "TODO" },
+  { title = "Model unload via /free with measured memory + cancel via interrupt", status = "TODO" },
 ]
 
 [[modules]]
@@ -319,7 +322,9 @@ status = "NOT_STARTED"
 owner = ""
 tasks = [
   { title = "VideoProvider ABC with capabilities (ADR-006)", status = "TODO" },
-  { title = "LTXProvider: i2v, t2v, first/last frame", status = "TODO" },
+  { title = "ComfyUI adapter: submit, progress, /free, interrupt, fetch outputs", status = "TODO" },
+  { title = "Workflow templates + field manifests (workflows/ltx)", status = "TODO" },
+  { title = "LTX via ComfyUI: i2v, t2v, first/last frame", status = "TODO" },
   { title = "Profiles Draft/Preview/Production + two-stage upscale", status = "TODO" },
   { title = "Hunyuan/Wan providers report UNSUPPORTED until verified", status = "TODO" },
   { title = "R-MOTION: IC-LoRA pose/depth control from reference footage", status = "TODO" },

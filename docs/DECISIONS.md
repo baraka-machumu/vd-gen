@@ -9,7 +9,7 @@ When an ADR changes a module's scope, update [`MODULES.md`](MODULES.md) and [`..
 | 001 | Monorepo layout per spec §54 | Proposed | M00 |
 | 002 | Control plane / GPU plane split | Proposed | M01, M17 |
 | 003 | Job system: Postgres is the source of truth, Redis carries signals only | Proposed | M14 |
-| 004 | MVP execution backend: native pipelines, ComfyUI after the MVP | Accepted (2026-09-29) | M17, M18 |
+| 004 | MVP execution backend: native pipelines, ComfyUI after the MVP | **Superseded by ADR-013** (2026-09-30) | — |
 | 005 | Unified-memory GPU scheduler; the LLM is a GPU tenant | Proposed | M15 |
 | 006 | One capability-based provider interface per modality | Proposed | M11, M18, M19, M25 |
 | 007 | GPU images are based on NVIDIA NGC arm64 containers | Proposed | M17 |
@@ -18,6 +18,7 @@ When an ADR changes a module's scope, update [`MODULES.md`](MODULES.md) and [`..
 | 010 | Media delivery through nginx `auth_request`; MinIO never exposed | Proposed | M09, M01 |
 | 011 | Status tracking lives in `status/status.toml` | Accepted (2026-09-29) | — |
 | 012 | Deployment scope: private office network, employee likenesses | Accepted (2026-09-29) | M01, M06, M25, M33 |
+| 013 | ComfyUI is the primary video execution backend | Accepted (2026-09-30) | M15, M17, M18, M19, M28 |
 
 ---
 
@@ -51,7 +52,7 @@ When an ADR changes a module's scope, update [`MODULES.md`](MODULES.md) and [`..
 **Context.** Spec §7 prefers official Lightricks pipelines. §8 wants ComfyUI as an optional backend. Doing both before the MVP doubles the integration work (review S2).
 **Decision.** The `ai-engine` runs official LTX Python pipelines behind `VideoProvider`. A **workflow** is a versioned JSON recipe (`{backend: "native", pipeline, version, params}`) stored in `generation_workflows`, which satisfies §8 reproducibility. The ComfyUI backend (`{backend: "comfyui", graph}`) comes after the MVP.
 **Alternative considered.** ComfyUI-first, rejected for the MVP because it would mean running two execution paths before the MVP.
-**Accepted** 2026-09-29 by the product owner.
+**Accepted** 2026-09-29 by the product owner. **Superseded by ADR-013 on 2026-09-30:** the premise changed when we learned that working ComfyUI graphs and weights for LTX, Hunyuan and Wan already exist on the GX10.
 
 ## ADR-005: Unified-memory GPU scheduler; the LLM is a GPU tenant
 
@@ -73,6 +74,7 @@ When an ADR changes a module's scope, update [`MODULES.md`](MODULES.md) and [`..
 **Context.** GB10 is a new Blackwell variant, and generic aarch64 PyTorch wheels may lack its kernels (review §5.1).
 **Decision.** `ai-engine` builds `FROM nvcr.io/nvidia/pytorch:<tag>` (an arm64 tag that has been validated on DGX OS). Each tag bump runs `scripts/health/gpu_smoke.py`: torch.cuda, device name, a bf16 matmul, attention kernels and a model load.
 **Consequences.** The Python version inside ai-engine follows NGC and is decoupled from the backend.
+**Amended by ADR-013:** for the MVP, the GPU runtime is the existing ComfyUI install on the GX10. This ADR now applies when that install is containerized (M17), and to any native-pipeline fallback.
 
 ## ADR-008: Keyframe/identity image model: selected by benchmark (OPEN)
 
@@ -106,3 +108,20 @@ When an ADR changes a module's scope, update [`MODULES.md`](MODULES.md) and [`..
 **Consequences.**
 - Internal-only use does **not** remove model-license obligations, because a company using a model internally is still commercial use. M16 license verification stays mandatory.
 - The consent model (M33) moves forward to P2, so it lands together with character references (M06).
+
+## ADR-013: ComfyUI is the primary video execution backend
+
+**Context.** The GX10 already runs ComfyUI with LTX-2.3, HunyuanVideo and Wan installed and working (P0 spike, [`models.md`](models.md)). That removes the main argument for native pipelines (ADR-004): there is nothing left to prove about running the models, and the weights are already downloaded. Spec §8 already allows ComfyUI as an execution backend.
+**Decision.**
+- All GPU generation (keyframes, video, upscaling, and later control/LoRA inference) runs through ComfyUI's HTTP API behind the `VideoProvider`/`ImageProvider` interfaces (ADR-006). No application code outside the ComfyUI adapter knows ComfyUI exists.
+- **Workflow templates** are API-format ComfyUI graphs, versioned in `workflows/<provider>/`. Each template has a small manifest that maps our typed request fields (prompt, image, seed, width, height, length, LoRA, strength, and so on) to `node_id.input` paths. The adapter fills in a copy of the template. Users never edit graphs in production.
+- **Reproducibility (spec §8, §40, §82):** each generation attempt stores the exact submitted graph (+ SHA256), the template version, the ComfyUI version, the custom-node versions (git commits), the model file names + SHA256, and the seed. Outputs are fetched through the API and stored as immutable assets in MinIO. ComfyUI's own output folder is not the system of record.
+- **The scheduler (ADR-005) is the only submitter** in production. It submits one job at a time (`MAX_CONCURRENT_VIDEO_JOBS=1`), tracks progress via ComfyUI's queue and history APIs, and calls `POST /free` to release memory before switching model families (for example LTX → Wan) or before an LLM planning batch.
+- **ComfyUI's result cache:** generation requests always carry an explicit seed. "Regenerate with the same seed" (spec §26) is sent with a cache-busting marker so it re-executes instead of returning the cached output (lesson from the P0 spike).
+- **Pinning:** ComfyUI core and each custom node are pinned to recorded commits. Updates go through a staging check: re-run the golden workflows and compare against the reference outputs before adopting.
+- **MVP:** we use the **existing** ComfyUI install on the GX10 as an external service (URL from `COMFYUI_URL`). M17 containerizes it (NGC base, ADR-007) after the MVP, or earlier if pinning the existing install proves unreliable.
+- The native LTX pipeline scripts (`scripts/spike/ltx_spike.sh`) stay as a **fallback** and a diagnostic tool, not a second production path.
+**Consequences.**
+- Hunyuan and Wan become reachable through the same adapter. They are still gated by M16 license approval and per-model benchmarks.
+- The ComfyUI on the GX10 is now production infrastructure. Ad-hoc use of it (manual experiments in the web UI) competes with platform jobs and can evict loaded models. Once the platform is live, manual use must be scheduled or moved to a separate instance.
+- We inherit ComfyUI's release cadence and custom-node quality, which is why the pinning and golden-workflow checks above are mandatory.

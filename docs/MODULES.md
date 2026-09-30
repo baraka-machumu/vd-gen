@@ -111,11 +111,11 @@ Exit: registry states (installed / not installed / downloading / unavailable / i
 
 **M17: AI Engine Runtime**
 P0 (spike), P4 · `ai-engine/common/` · §36, §37, §75, §80 · M16
-Exit: an NGC arm64 image (ADR-007), a job execution loop that claims GPU jobs, model load/unload with measured memory, cooperative cancel, and a GPU smoke test. `ai-engine` and `llm` are the only GPU tenants.
+Exit: a ComfyUI runtime (ADR-013) with pinned core and custom-node commits and golden-workflow regression checks; model unload via `/free` with measured memory; cooperative cancel via ComfyUI interrupt; and a GPU smoke test. MVP uses the existing GX10 ComfyUI install; post-MVP it is containerized on an NGC arm64 base (ADR-007). ComfyUI and `llm` are the only GPU tenants.
 
 **M18: Video Providers**
-P4 (LTX), post-MVP (Hunyuan/Wan) · `ai-engine/ltx/`, `ai-engine/hunyuan/`, `ai-engine/wan/`, `workflows/` · §6, §7, §8, §57, §58, §72, §79 · M17
-Exit: LTX-2.3 i2v + t2v (+ first/last frame if supported) via native official pipelines (ADR-004) and the capability interface (ADR-006), Draft/Preview/Production profiles, and two-stage upscale. Unverified providers report `UNSUPPORTED_ON_CURRENT_HARDWARE`. The workflow recipe is stored per attempt (ADR-004).
+P4 (LTX), post-MVP (Hunyuan/Wan) · `ai-engine/comfyui/` (adapter), `workflows/ltx/`, `workflows/hunyuan/`, `workflows/wan/` · §6, §7, §8, §57, §58, §72, §79 · M17
+Exit: a ComfyUI adapter behind the capability interface (ADR-006, ADR-013), with versioned API-format workflow templates + field manifests. LTX-2.3 i2v, t2v and first/last frame; Draft/Preview/Production profiles; two-stage upscale. The exact submitted graph + SHA256 is stored per attempt. Hunyuan/Wan templates exist but report `NOT_APPROVED` until M16 license approval and benchmarks.
 
 **M19: Image / Keyframe Provider**
 P4 · `ai-engine/image/` · §21, §79 · M17

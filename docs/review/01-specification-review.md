@@ -189,4 +189,4 @@ The MVP = Phases 0–6, gated by the §69 acceptance test. See [`../MODULES.md`]
 | 3 | **Team / GX10 access:** who does bring-up? | The product owner deploys to the GX10 and runs the P0 spike. **Team size still open.** |
 | 4 | **Throughput expectation:** finished minutes per week? | **Open.** Set it after the P0 benchmark. |
 | 5 | **Local LLM preference / license?** | **Open.** |
-| 6 | **Execution backend for the MVP?** | Native pipelines, the recommended option. ADR-004 is accepted. |
+| 6 | **Execution backend for the MVP?** | Native pipelines at first (ADR-004). **Changed 2026-09-30 to ComfyUI-first (ADR-013)** after we learned that working ComfyUI graphs already exist on the GX10. |
