@@ -12,7 +12,7 @@ License status is tracked separately in M16 and is **not** implied by "runs on G
 | Unified memory | 121.7 GiB visible to the OS. `nvidia-smi memory.total` = N/A, so memory must be measured via `/proc/meminfo` | same |
 | Storage | 3.6 TB root, 1.5 TB free | same |
 | NGC PyTorch in container | PASS (details in `gpu_smoke-*.json`, pending review) | same |
-| Resident load | ComfyUI (LTX, Hunyuan, Wan installed) keeps ~58 GiB resident between jobs | owner report + verify run |
+| Resident load | ~55–58 GiB in use between jobs, of which ~38 GiB is ComfyUI's loaded models (released by `POST /free`: MemAvailable 67 → 105 GiB). ~17 GiB is the rest of the system | owner report + verify run + `ltx-i2v-cold-20260930T111849Z.json` |
 
 ## Execution backend status
 
@@ -29,8 +29,9 @@ License status is tracked separately in M16 and is **not** implied by "runs on G
 | 2026-09-30 | LTX-2.3 **t2v** (ComfyUI) | 1280×704 @ 30 fps | 1201 / 40.0 s | 986.9 s (incl. model load) | **≈ 24.7 s** | 34.5 GiB | Single 40 s generation containing ~6 implicit shots. Steps/checkpoint unknown: workflow summary pending. Run 2 was a cache hit (invalid); fixed in `comfy_run.py`. |
 | 2026-09-30 | LTX-2.3 **i2v** (ComfyUI), dev fp8 + distilled LoRA 0.5, x2 spatial upscaler, audio on | 1280×704 @ 25 fps | 201 / 8.04 s | 102.1 s / 100.2 s (2 runs, **warm**) | **≈ 12.5 s** (ComfyUI exec 100.9 s / 99.0 s) | 8.8 GiB above ~55 GiB already resident; min available 57.8 GiB | 36/51 nodes cached (models loaded, enhanced prompt reused); fresh seeds, so not a cache hit. GPU peak 95 %, 83 W. Cold run not measured. `ltx-i2v-20260930T103322Z.json` |
 | 2026-09-30 | LTX-2.3 **i2v**, same workflow, **prompt enhancer off** | 1280×704 @ 25 fps | 201 / 8.04 s | 98.2 s / 100.2 s (2 runs, warm) | **≈ 12.2 s** (ComfyUI exec 97.8 s / 98.2 s) | 8.3 GiB; min available 58.1 GiB | Run 1 re-encoded the new prompt (31/51 cached), run 2 36/51. Removing the enhancer saves no measurable time. GPU peak 96 %, 84 W. `ltx-i2v-noenh-20260930T110141Z.json` |
+| 2026-09-30 | LTX-2.3 **i2v**, enhancer off, **cold ComfyUI** (`--cold`, models unloaded via `/free`) | 1280×704 @ 25 fps | 201 / 8.04 s | 108.3 s (1 run) | **≈ 13.4 s** (ComfyUI exec 107.6 s) | **46.9 GiB** from 105.1 GiB available; min available 58.1 GiB | 0/51 cached. Model load adds only ≈ 10 s because the OS page cache still held the weights: this is a ComfyUI cold start, **not** a cold start from disk (after reboot). GPU peak 95 %, 78 W. `ltx-i2v-cold-20260930T111849Z.json` |
 
-**Early extrapolation:** a 10-min episode is ~600 s of video. At the warm i2v rate (~12.5 s/s, 8 s shots) that is ≈ 2.1 h raw generation at 720p, before model loads, regenerations and keyframes. The t2v rate (~25 s/s) gave ≈ 4 h. Neither is an NFR yet: it needs a cold run, and i2v output quality (Q7) must pass first.
+**Early extrapolation:** a 10-min episode is ~600 s of video. At the i2v rate (~12.2 s/s warm, 8 s shots) that is ≈ 2.0 h raw generation at 720p, before regenerations and keyframes; model reload adds ≈ 10 s per load while the page cache is warm. The t2v rate (~25 s/s) gave ≈ 4 h. **Memory budget:** the LTX-2.3 i2v workflow needs ≈ 47 GiB at peak including its models, so it fits alongside the ~17 GiB system baseline with ~58 GiB to spare, but not alongside a second large model left loaded in ComfyUI.
 
 ## Quality findings: P0 clip review (2026-09-30)
 
@@ -67,3 +68,12 @@ Same workflow and keyframe, `--set 320:328.value=false`, 2 fresh seeds. The repo
 | Q10 | Both runs hold the keyframe for all 8 s: same two people, same jackets and backpack, one continuous shot with no cuts; the gesture and look-toward described in the prompt happen. Q7/Q8 were caused by the prompt enhancer | Positive | Enhancer off by default (review/02 i2v update); keyframe-first i2v confirmed as the way to keep identity within a shot |
 | Q11 | Run 2 ends with both men looking into the camera | Low | Breaks documentary style; add "not looking at the camera" to M10 i2v prompt defaults; QC can flag it later |
 | Q12 | Faces look consistent at contact-sheet scale, but only a face-similarity score can confirm identity across the shot | Info | M21 keyframe identity check (first/last frame vs keyframe) |
+
+### Cold-start run (2026-09-30)
+
+Clip: `storage/ltx-i2v-cold-20260930T111849Z-run1/LTX_2.3_i2v_00011_.mp4`, same settings as the enhancer-off runs.
+
+| # | Finding | Severity | Response |
+|---|---|---|---|
+| Q13 | Third seed with enhancer off: same people, jackets and single continuous shot for 8 s (3/3 seeds now) | Positive | Confirms Q10 |
+| Q14 | The backpack shifts shape mid-clip: its straps become a brown bag hanging at his side (~2–6 s), then return to straps at 8 s | Low | Prop drift; describe props explicitly in M10 i2v prompts ("wearing a tan backpack on both shoulders"); include props in the M21 keyframe check |
