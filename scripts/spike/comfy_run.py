@@ -13,6 +13,10 @@ Usage (on the GX10, standard library only):
 
 --cold asks ComfyUI to unload all models first (POST /free), so run 1 includes model load time.
    WARNING: this affects anyone else using the same ComfyUI; don't use it while others are generating.
+
+Every run gets a fresh random seed (inputs named seed / noise_seed), recorded in the report. Without it,
+ComfyUI returns its cached result for an identical request and the "run" measures nothing.
+Use --fixed-seed to keep the workflow's seeds (a repeat will then be served from cache).
 """
 
 from __future__ import annotations
@@ -22,6 +26,7 @@ import copy
 import datetime as dt
 import hashlib
 import json
+import random
 import sys
 import time
 import urllib.parse
@@ -58,6 +63,46 @@ def apply_overrides(workflow: dict[str, Any], sets: list[str]) -> dict[str, Any]
             value = raw
         wf[node_id].setdefault("inputs", {})[input_name] = value
     return wf
+
+
+SEED_INPUTS = ("seed", "noise_seed")
+# Inputs worth recording next to every timing (resolution, length, steps, models, ...).
+SUMMARY_INPUTS = (
+    "width", "height", "length", "num_frames", "frames", "frame_rate", "fps", "batch_size",
+    "steps", "cfg", "sampler_name", "scheduler", "denoise", "strength",
+    "ckpt_name", "unet_name", "model_name", "clip_name", "clip_name1", "clip_name2", "vae_name",
+    "lora_name", "strength_model", "upscale_model", "weight_dtype",
+) + SEED_INPUTS
+
+
+def reseed(workflow: dict[str, Any], pinned: set[str]) -> dict[str, int]:
+    """Give every literal seed input a fresh random value (in place); skip inputs pinned by --set."""
+    used = {}
+    for node_id, node in workflow.items():
+        inputs = node.get("inputs", {})
+        for name in SEED_INPUTS:
+            key = f"{node_id}.{name}"
+            if name in inputs and not isinstance(inputs[name], list) and key not in pinned:
+                inputs[name] = random.randint(0, 2**48)
+                used[key] = inputs[name]
+    return used
+
+
+def summarize(workflow: dict[str, Any]) -> list[dict[str, Any]]:
+    """Literal (non-linked) key settings per node, so timings can be interpreted later."""
+    rows = []
+    for node_id, node in sorted(workflow.items(), key=lambda kv: int(kv[0]) if kv[0].isdigit() else 0):
+        params = {k: v for k, v in node.get("inputs", {}).items() if k in SUMMARY_INPUTS and not isinstance(v, list)}
+        if params:
+            rows.append({"node": node_id, "class_type": node["class_type"], **params})
+    return rows
+
+
+def cached_nodes(entry: dict[str, Any]) -> int:
+    for msg in entry.get("status", {}).get("messages", []):
+        if len(msg) == 2 and msg[0] == "execution_cached":
+            return len(msg[1].get("nodes", []))
+    return 0
 
 
 def queue_state(url: str, prompt_id: str) -> str:
@@ -122,6 +167,7 @@ def main() -> int:
     parser.add_argument("--runs", type=int, default=1)
     parser.add_argument("--cold", action="store_true", help="unload all ComfyUI models before run 1")
     parser.add_argument("--set", dest="sets", action="append", default=[], metavar="NODE.INPUT=VALUE")
+    parser.add_argument("--fixed-seed", action="store_true", help="keep the workflow's seeds (repeats hit the cache)")
     parser.add_argument("--timeout", type=float, default=3600)
     parser.add_argument("--report-dir", type=Path, default=ROOT / "reports" / "p0")
     parser.add_argument("--output-dir", type=Path, default=ROOT / "outputs")
@@ -131,8 +177,13 @@ def main() -> int:
     if not all(isinstance(v, dict) and "class_type" in v for v in workflow.values()):
         raise SystemExit("This is not an API-format workflow. In ComfyUI use Workflow -> Export (API).")
     workflow = apply_overrides(workflow, args.sets)
+    pinned = {item.partition("=")[0] for item in args.sets}
     wf_bytes = json.dumps(workflow, sort_keys=True).encode("utf-8")
     wf_sha = hashlib.sha256(wf_bytes).hexdigest()
+    summary = summarize(workflow)
+    print("Workflow settings:")
+    for row in summary:
+        print("  " + ", ".join(f"{k}={v}" for k, v in row.items()))
 
     stats_before = http(args.url, "/system_stats")
     queue = http(args.url, "/queue")
@@ -151,6 +202,7 @@ def main() -> int:
     runs = []
     rc = 0
     for i in range(1, args.runs + 1):
+        seeds = {} if args.fixed_seed else reseed(workflow, pinned)
         before = meminfo_kib()["MemAvailable"]
         sampler = Sampler(interval=1.0)
         sampler.start()
@@ -174,6 +226,9 @@ def main() -> int:
             "cold": args.cold and i == 1,
             "wall_time_s": round(wall, 1),
             "comfy_exec_time_s": exec_time_s(entry),
+            "seeds": seeds,
+            "cached_nodes": cached_nodes(entry),
+            "served_from_cache": bool(entry) and cached_nodes(entry) >= len(workflow),
             "available_before_gib": round(before / 2**20, 2),
             "peak_used_delta_gib": round((before - min_avail) / 2**20, 2),
             "min_available_gib": round(min_avail / 2**20, 2),
@@ -185,7 +240,10 @@ def main() -> int:
         runs.append(run)
         rc = rc or (1 if error else 0)
         print(f"[run {i}] {'OK' if not error else 'ERROR'} wall={run['wall_time_s']}s exec={run['comfy_exec_time_s']}s "
-              f"peak_mem_delta={run['peak_used_delta_gib']} GiB outputs={len(outputs)}", flush=True)
+              f"peak_mem_delta={run['peak_used_delta_gib']} GiB outputs={len(outputs)} "
+              f"cached_nodes={run['cached_nodes']}/{len(workflow)}", flush=True)
+        if run["served_from_cache"]:
+            print(f"[run {i}] WARNING: every node was served from ComfyUI's cache; this timing is NOT a generation.")
 
     report = {
         "label": args.label,
@@ -194,6 +252,7 @@ def main() -> int:
         "workflow_file": str(args.workflow),
         "workflow_sha256": wf_sha,
         "overrides": args.sets,
+        "workflow_summary": summary,
         "comfy_system_before": stats_before,
         "comfy_system_after": http(args.url, "/system_stats"),
         "memory_total_gib": round(meminfo_kib()["MemTotal"] / 2**20, 2),
