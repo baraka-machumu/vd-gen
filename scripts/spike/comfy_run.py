@@ -71,8 +71,11 @@ SUMMARY_INPUTS = (
     "width", "height", "length", "num_frames", "frames", "frame_rate", "fps", "batch_size",
     "steps", "cfg", "sampler_name", "scheduler", "denoise", "strength",
     "ckpt_name", "unet_name", "model_name", "clip_name", "clip_name1", "clip_name2", "vae_name",
-    "lora_name", "strength_model", "upscale_model", "weight_dtype",
+    "lora_name", "strength_model", "upscale_model", "weight_dtype", "text_encoder", "image", "text", "sigmas",
 ) + SEED_INPUTS
+# Primitive nodes hold UI-level settings (width, duration, prompt, feature switches) under "value";
+# they are only meaningful together with the node title, so both are recorded.
+PRIMITIVE_PREFIX = "Primitive"
 
 
 def reseed(workflow: dict[str, Any], pinned: set[str]) -> dict[str, int]:
@@ -92,10 +95,23 @@ def summarize(workflow: dict[str, Any]) -> list[dict[str, Any]]:
     """Literal (non-linked) key settings per node, so timings can be interpreted later."""
     rows = []
     for node_id, node in sorted(workflow.items(), key=lambda kv: int(kv[0]) if kv[0].isdigit() else 0):
-        params = {k: v for k, v in node.get("inputs", {}).items() if k in SUMMARY_INPUTS and not isinstance(v, list)}
+        wanted = SUMMARY_INPUTS + (("value",) if node["class_type"].startswith(PRIMITIVE_PREFIX) else ())
+        params = {k: v for k, v in node.get("inputs", {}).items() if k in wanted and not isinstance(v, list)}
         if params:
-            rows.append({"node": node_id, "class_type": node["class_type"], **params})
+            title = node.get("_meta", {}).get("title")
+            rows.append({"node": node_id, "class_type": node["class_type"],
+                         **({"title": title} if title and title != node["class_type"] else {}), **params})
     return rows
+
+
+def text_outputs(entry: dict[str, Any]) -> dict[str, list[str]]:
+    """Text shown by preview nodes (e.g. an LLM-enhanced prompt), keyed by node id."""
+    found = {}
+    for node_id, node_out in entry.get("outputs", {}).items():
+        texts = node_out.get("text")
+        if isinstance(texts, list) and all(isinstance(t, str) for t in texts):
+            found[node_id] = texts
+    return found
 
 
 def cached_nodes(entry: dict[str, Any]) -> int:
@@ -181,9 +197,11 @@ def main() -> int:
     wf_bytes = json.dumps(workflow, sort_keys=True).encode("utf-8")
     wf_sha = hashlib.sha256(wf_bytes).hexdigest()
     summary = summarize(workflow)
-    print("Workflow settings:")
+    print("Workflow settings:" + ("" if args.fixed_seed else " (seeds are replaced per run; see the report)"))
     for row in summary:
-        print("  " + ", ".join(f"{k}={v}" for k, v in row.items()))
+        shown = {k: v for k, v in row.items() if args.fixed_seed or k not in SEED_INPUTS}
+        if len(shown) > 2 + ("title" in shown):
+            print("  " + ", ".join(f"{k}={v}" for k, v in shown.items()))
 
     stats_before = http(args.url, "/system_stats")
     queue = http(args.url, "/queue")
@@ -235,6 +253,7 @@ def main() -> int:
             "gpu_peak_util_pct": max((s["util_pct"] for s in sampler.gpu_samples if s.get("util_pct") is not None), default=None),
             "gpu_peak_power_w": max((s["power_w"] for s in sampler.gpu_samples if s.get("power_w") is not None), default=None),
             "outputs": outputs,
+            "text_outputs": text_outputs(entry) if entry else {},
             "error": error,
         }
         runs.append(run)

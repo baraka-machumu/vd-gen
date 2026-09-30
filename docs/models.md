@@ -18,7 +18,7 @@ License status is tracked separately in M16 and is **not** implied by "runs on G
 
 | Model | Backend | Status on GX10 | Evidence |
 |---|---|---|---|
-| LTX-2.3 | ComfyUI (existing install) | **Runs.** t2v verified; i2v not yet measured | `ltx-i2v-20260930T085253Z.json` (note: this run was t2v despite the label) |
+| LTX-2.3 | ComfyUI (existing install) | **Runs.** t2v and i2v verified (i2v: warm runs only; cold not yet measured) | t2v: `ltx-i2v-20260930T085253Z.json` (this run was t2v despite the label); i2v: `ltx-i2v-20260930T103322Z.json` |
 | HunyuanVideo | ComfyUI (existing install) | Installed, not yet measured | — |
 | Wan | ComfyUI (existing install) | Installed, not yet measured | — |
 
@@ -27,8 +27,9 @@ License status is tracked separately in M16 and is **not** implied by "runs on G
 | Date | Model / mode | Resolution | Frames / duration | Wall time | Compute per video-second | Peak extra memory | Notes |
 |---|---|---|---|---|---|---|---|
 | 2026-09-30 | LTX-2.3 **t2v** (ComfyUI) | 1280×704 @ 30 fps | 1201 / 40.0 s | 986.9 s (incl. model load) | **≈ 24.7 s** | 34.5 GiB | Single 40 s generation containing ~6 implicit shots. Steps/checkpoint unknown: workflow summary pending. Run 2 was a cache hit (invalid); fixed in `comfy_run.py`. |
+| 2026-09-30 | LTX-2.3 **i2v** (ComfyUI), dev fp8 + distilled LoRA 0.5, x2 spatial upscaler, audio on | 1280×704 @ 25 fps | 201 / 8.04 s | 102.1 s / 100.2 s (2 runs, **warm**) | **≈ 12.5 s** (ComfyUI exec 100.9 s / 99.0 s) | 8.8 GiB above ~55 GiB already resident; min available 57.8 GiB | 36/51 nodes cached (models loaded, enhanced prompt reused); fresh seeds, so not a cache hit. GPU peak 95 %, 83 W. Cold run not measured. `ltx-i2v-20260930T103322Z.json` |
 
-**Early extrapolation (to be replaced with i2v numbers):** a 10-min episode is ~600 s of video × ~25 s/s ≈ 4 h raw generation at 720p, before regenerations, keyframes and upscaling.
+**Early extrapolation:** a 10-min episode is ~600 s of video. At the warm i2v rate (~12.5 s/s, 8 s shots) that is ≈ 2.1 h raw generation at 720p, before model loads, regenerations and keyframes. The t2v rate (~25 s/s) gave ≈ 4 h. Neither is an NFR yet: it needs a cold run, and i2v output quality (Q7) must pass first.
 
 ## Quality findings: P0 clip review (2026-09-30)
 
@@ -42,3 +43,17 @@ Source: `storage/LTX_2.3_t2v_00014_.mp4` (local, not committed). It was reviewed
 | Q4 | Ghosting dissolve between implied shots (38.2 s) | Medium | Model-invented transitions inside one generation | Cuts and transitions only in the edit (M26), never inside a generation |
 | Q5 | People look stiff / robotic | High | No motion reference; long clip | Motion transfer from real reference footage (pose control); QC motion score (M21); compare the dev vs. distilled model |
 | Q6 | Environment, lighting and vehicle stay consistent | Positive | — | Keep; confirms environment consistency is achievable |
+
+## Quality findings: first i2v run (2026-09-30)
+
+Source: `storage/ltx-i2v-20260930T103322Z-run{1,2}/LTX_2.3_i2v_0000{7,8}_.mp4` (local, not committed), reviewed from frames at 0/2/4/6/8 s.
+Keyframe: `ComfyUI_00107_.png` (two young men in jackets at a fruit market, looking at phones). Prompt (node `Prompt`):
+
+> Two young men standing together at an outdoor fruit market, looking at a smartphone and having a natural conversation. The man on the left gestures naturally with his hand while speaking, and the man on the right looks at the phone and then looks toward him. Subtle realistic body movement, natural facial expressions, gentle handheld camera movement, slight movement of people and fruit in the background, realistic lighting, cinematic documentary style, smooth continuous motion, highly detailed, photorealistic.
+
+| # | Finding | Severity | Suspected cause | Next step |
+|---|---|---|---|---|
+| Q7 | Frame 0 matches the keyframe, then identity and wardrobe drift: run 1 has different people in grey/white T-shirts by ~2 s, run 2 swaps one man into a white T-shirt by ~4 s | High | Not the user prompt (it asks for continuous motion and mentions no clothing). Prime suspect: the workflow's **prompt enhancer** (`TextGenerateLTX2Prompt`, "Enable Prompt Enhance" = true) rewrites the prompt with Gemma; the rewrite was cached and reused by both runs. Contributing: the prompt does not anchor appearance (jackets, backpack) | Rerun with enhancer off (same keyframe, 2 seeds) and record the enhanced prompt text (`comfy_run.py` now saves preview-node text) |
+| Q8 | Implicit shot changes inside one 8 s clip (close two-shot → wide market shots; run 2 ends in a motion-blurred close-up) | High | Same as Q7; violates R-SHOT | Same rerun; if it persists with the enhancer off, test 5 s instead of 8 s and an appearance-anchored prompt |
+| Q9 | Market environment, lighting and colour stay consistent with the keyframe | Positive | — | Keep |
+

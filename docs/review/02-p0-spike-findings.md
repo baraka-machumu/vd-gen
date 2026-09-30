@@ -48,3 +48,18 @@ does not address at all.
 | M21 QC | OCR text check; motion score calibration set includes this clip |
 | M26 Timeline & Render | Signage/logo compositing, lower-thirds |
 | M17 spike | Next measurement: LTX-2.3 **i2v**, 5–8 s, from a keyframe; then the same shot with first/last frame |
+
+## Update 2026-09-30: first i2v run
+
+Two warm LTX-2.3 i2v runs from a keyframe (8 s, 1280×704): ~12.5 s compute per video-second, half the t2v rate. Details and prompt in [`../models.md`](../models.md) (Q7–Q9).
+
+Keyframe-first did **not** by itself keep identity: the characters change clothes and the clip cuts to new framings within 2–4 s. The user prompt did not ask for this. The workflow's built-in prompt enhancer (an LLM rewrite step) is the prime suspect.
+
+### Requirement changes
+- **R-SHOT, addition:** the final prompt sent to the video model is the prompt the platform wrote. Any LLM rewrite step inside a workflow (e.g. `TextGenerateLTX2Prompt`) is disabled in production workflows unless its output is captured, stored with the shot, and passes the same R-TEXT/R-SHOT rules. The stored prompt is the one that was actually encoded (spec §8 reproducibility).
+- **M10 Prompt Engine:** i2v prompts describe the keyframe's fixed appearance (wardrobe, props) and state "same people, same clothing, single continuous shot" so that the prompt reinforces the keyframe rather than competing with it.
+- **M21 QC:** identity check compares the first and last frames of each shot with the keyframe (face + wardrobe), not only against the character reference.
+
+### Open decision
+- The example workflow loads `gemma-3-12b-it-abliterated_lora` (Gemma with refusal behaviour removed). It feeds **only** the prompt enhancer (`LoraLoader` → `TextGenerateLTX2Prompt`); the video text encoding (`CLIPTextEncode`) uses the plain Gemma encoder. With the enhancer off, the LoRA is not used. Whether production workflows may keep it is a product-owner decision, to be recorded as an ADR before M18 fixes the golden workflow.
+
