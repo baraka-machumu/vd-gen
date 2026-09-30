@@ -7,3 +7,4 @@
 | `models/` | Pinned model fetch + offline bundle (spec §50) | M16 |
 | `backup/` | Backup/restore | M30 |
 | `status/` | `render_status.py` — status tracker (ADR-011) | M00 |
+| `spike/` | P0 LTX-2.3 spike: `ltx_spike.sh`, `measure.py` (runbook: [docs/runbooks/p0-gx10-spike.md](../docs/runbooks/p0-gx10-spike.md)) | M17 |

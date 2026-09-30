@@ -110,10 +110,10 @@ tasks = [
 id = "M02"
 name = "Hardware detection & System API"
 phases = ["P0", "P1"]
-status = "NOT_STARTED"
+status = "IN_PROGRESS"
 owner = ""
 tasks = [
-  { title = "scripts/setup/verify_gx10.sh (spec 74 output)", status = "TODO" },
+  { title = "scripts/setup/verify_gx10.sh (spec 74 output): written, awaiting GX10 run", status = "DOING" },
   { title = "Hardware probe service (uname, nvidia-smi, torch, disk, memory)", status = "TODO" },
   { title = "GET /api/v1/system/capabilities + /hardware", status = "TODO" },
   { title = "/health, /health/{database,redis,minio,gpu,models,comfyui}", status = "TODO" },
@@ -294,11 +294,12 @@ tasks = [
 id = "M17"
 name = "AI Engine Runtime"
 phases = ["P0", "P4"]
-status = "NOT_STARTED"
+status = "IN_PROGRESS"
 owner = "Product owner (GX10 deployment)"
 tasks = [
-  { title = "SPIKE: NGC PyTorch arm64 on GB10, torch.cuda smoke test", status = "TODO" },
-  { title = "SPIKE: LTX-2.3 i2v one clip; record time + peak memory", status = "TODO" },
+  { title = "SPIKE: NGC PyTorch arm64 on GB10 smoke test (scripts/health/gpu_smoke.py): awaiting GX10 run", status = "DOING" },
+  { title = "SPIKE: LTX-2.3 i2v one clip, time + peak memory (scripts/spike/ltx_spike.sh): awaiting GX10 run", status = "DOING" },
+  { title = "Record spike results in docs/models.md + set throughput NFR", status = "TODO" },
   { title = "ai-engine image (ADR-007) + GPU job loop", status = "TODO" },
   { title = "Model load/unload with measured memory + cooperative cancel", status = "TODO" },
 ]
@@ -477,6 +478,7 @@ status = "IN_PROGRESS"
 owner = ""
 tasks = [
   { title = "Planning docs (spec, review, ADRs, modules)", status = "DONE" },
+  { title = "Runbook: docs/runbooks/p0-gx10-spike.md", status = "DONE" },
   { title = "architecture.md", status = "TODO" },
   { title = "developer-guide.md", status = "TODO" },
   { title = "deployment.md + offline-operation.md", status = "TODO" },

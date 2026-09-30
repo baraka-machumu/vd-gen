@@ -2,6 +2,8 @@
 .env
 .env.*
 !.env.example
+# Local spike config (contains HF_TOKEN)
+scripts/spike/*.env
 
 # Python
 __pycache__/
