@@ -299,6 +299,7 @@ owner = "Product owner (GX10 deployment)"
 tasks = [
   { title = "SPIKE: NGC PyTorch arm64 on GB10 smoke test (scripts/health/gpu_smoke.py): awaiting GX10 run", status = "DOING" },
   { title = "SPIKE: LTX-2.3 i2v one clip, time + peak memory (scripts/spike/ltx_spike.sh): awaiting GX10 run", status = "DOING" },
+  { title = "SPIKE via existing ComfyUI on GX10 (LTX/Hunyuan/Wan installed): comfy_probe.py + comfy_run.py, awaiting run", status = "DOING" },
   { title = "Record spike results in docs/models.md + set throughput NFR", status = "TODO" },
   { title = "ai-engine image (ADR-007) + GPU job loop", status = "TODO" },
   { title = "Model load/unload with measured memory + cooperative cancel", status = "TODO" },
