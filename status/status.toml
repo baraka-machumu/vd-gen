@@ -307,7 +307,7 @@ tasks = [
   { title = "Record spike results in docs/models.md + set throughput NFR", status = "TODO" },
   { title = "Spike: first t2v clip reviewed; findings in docs/models.md + review/02", status = "DONE" },
   { title = "Spike: LTX-2.3 i2v 5-8 s from keyframe (export i2v workflow): 2 warm runs measured, identity drift Q7", status = "DONE" },
-  { title = "Spike: i2v rerun with prompt enhancer off (same keyframe, 2 seeds) + record enhanced prompt; fixes Q7/Q8?", status = "TODO" },
+  { title = "Spike: i2v rerun with prompt enhancer off (same keyframe, 2 seeds): fixes Q7/Q8, see Q10", status = "DONE" },
   { title = "Spike: i2v cold run (--cold) for model-load time", status = "TODO" },
   { title = "Decide on abliterated Gemma text-encoder LoRA in production workflows (ADR)", status = "TODO" },
   { title = "Spike: same shot with first/last frame; check IC-LoRA availability in ComfyUI", status = "TODO" },

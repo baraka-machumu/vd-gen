@@ -63,3 +63,5 @@ Keyframe-first did **not** by itself keep identity: the characters change clothe
 ### Open decision
 - The example workflow loads `gemma-3-12b-it-abliterated_lora` (Gemma with refusal behaviour removed). It feeds **only** the prompt enhancer (`LoraLoader` → `TextGenerateLTX2Prompt`); the video text encoding (`CLIPTextEncode`) uses the plain Gemma encoder. With the enhancer off, the LoRA is not used. Whether production workflows may keep it is a product-owner decision, to be recorded as an ADR before M18 fixes the golden workflow.
 
+### Result of the enhancer-off rerun (2026-09-30)
+Confirmed: with the enhancer off, both seeds keep identity, wardrobe and a single continuous shot for 8 s (models.md Q10). The R-SHOT addition above therefore means **prompt enhancer off by default** in production LTX workflows; the prompt engine (M10) owns prompt quality. With the enhancer off, the abliterated Gemma LoRA is not used either.
