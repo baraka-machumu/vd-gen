@@ -1,0 +1,132 @@
+# Control plane for one GX10 (spec §36, §66). Usage:  cp .env.example .env  (fill in)  &&  docker compose up -d --wait
+#
+# Networks:
+#   data (internal, no route out): postgres, redis, seaweedfs. Only the API and one-shot jobs join it.
+#   edge: nginx + api. The API needs it to reach ComfyUI on the GX10 (ADR-013); the egress guard limits where it goes.
+# Only nginx publishes a port, bound to HTTP_BIND (office-LAN address). The object store is never published (ADR-010).
+#
+# Not here yet, added with their modules: worker + scheduler (M14/M15), frontend (M27), `gpu` profile with
+# ai-engine/llm (M17/M11; during the MVP the GX10's existing ComfyUI is used via COMFYUI_URL), `monitoring` (M29).
+
+name: yas
+
+x-app-env: &app-env
+  env_file: .env
+  environment:
+    DATABASE_URL: postgresql://${POSTGRES_USER:?}:${POSTGRES_PASSWORD:?}@postgres:5432/${POSTGRES_DB:?}
+    REDIS_URL: redis://:${REDIS_PASSWORD:?}@redis:6379/0
+    S3_ENDPOINT: seaweedfs:8333
+
+x-buckets: &buckets
+  S3_BUCKETS: ai-video-assets,ai-video-models,ai-video-renders,ai-video-projects,ai-video-backups
+
+services:
+  postgres:
+    image: pgvector/pgvector:0.8.6-pg17-trixie
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+      POSTGRES_DB: ${POSTGRES_DB:?}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks: [data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  redis:
+    image: redis:8.10.2-alpine
+    # Postgres holds all job state (ADR-003); Redis only carries signals, so no persistence is needed.
+    command: ["sh", "-c", "exec redis-server --requirepass \"$$REDIS_PASSWORD\" --save '' --appendonly no"]
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?}
+    networks: [data]
+    healthcheck:
+      test: ["CMD-SHELL", "REDISCLI_AUTH=\"$$REDIS_PASSWORD\" redis-cli ping | grep -q PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  seaweedfs:
+    image: chrislusf/seaweedfs:4.48_large_disk
+    entrypoint: ["/bin/sh", "/infra/start.sh"]
+    environment:
+      <<: *buckets
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:?}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:?}
+    volumes:
+      - seaweedfs-data:/data
+      - ./infra/seaweedfs:/infra:ro
+    networks: [data]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:9333/cluster/healthz && wget -q -O /dev/null http://127.0.0.1:8333/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+
+  storage-init:
+    image: chrislusf/seaweedfs:4.48_large_disk
+    entrypoint: ["/bin/sh", "/infra/create-buckets.sh"]
+    environment:
+      <<: *buckets
+    volumes:
+      - ./infra/seaweedfs:/infra:ro
+    networks: [data]
+    depends_on:
+      seaweedfs: { condition: service_healthy }
+    restart: "no"
+
+  migrate:
+    <<: *app-env
+    image: yas-api:${API_TAG:-local}
+    build: { context: backend }
+    command: ["alembic", "upgrade", "head"]
+    networks: [data]
+    depends_on:
+      postgres: { condition: service_healthy }
+    restart: "no"
+
+  api:
+    <<: *app-env
+    image: yas-api:${API_TAG:-local}
+    build: { context: backend }
+    networks: [data, edge]
+    # Same-host ComfyUI (COMFYUI_URL=http://host.docker.internal:8188) on Linux.
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      storage-init: { condition: service_completed_successfully }
+      redis: { condition: service_healthy }
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:1.30.5-alpine
+    user: "101:101"
+    ports:
+      - "${HTTP_BIND:-127.0.0.1}:${HTTP_PORT:-8080}:8080"
+    volumes:
+      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./infra/nginx/proxy_params.conf:/etc/nginx/proxy_params.conf:ro
+    networks: [edge]
+    depends_on:
+      api: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+    restart: unless-stopped
+
+networks:
+  data:
+    internal: true
+  edge: {}
+
+volumes:
+  postgres-data:
+  seaweedfs-data:

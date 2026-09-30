@@ -20,6 +20,7 @@ When an ADR changes a module's scope, update [`MODULES.md`](MODULES.md) and [`..
 | 012 | Deployment scope: private office network, employee likenesses | Accepted (2026-09-29) | M01, M06, M25, M33 |
 | 013 | ComfyUI is the primary video execution backend | Accepted (2026-09-30) | M15, M17, M18, M19, M28 |
 | 014 | No in-workflow prompt enhancement; no abliterated models | Proposed | M10, M11, M16, M18 |
+| 015 | SeaweedFS replaces MinIO as the S3-compatible object store | Accepted (2026-09-30) | M01, M09, M30 |
 
 ---
 
@@ -90,6 +91,7 @@ When an ADR changes a module's scope, update [`MODULES.md`](MODULES.md) and [`..
 ## ADR-010: Media delivery through nginx `auth_request`; MinIO never exposed
 
 **Decision.** The browser requests `/media/{asset_id}?token=…`. nginx calls `auth_request` against the API, which checks the JWT or short-TTL token and the project membership, then proxies to MinIO over the internal network. MinIO's ports are not published.
+**Amended by ADR-015:** the object store is SeaweedFS; "MinIO" here means the object store.
 
 ## ADR-011: Status tracking lives in `status/status.toml`
 
@@ -138,3 +140,16 @@ When an ADR changes a module's scope, update [`MODULES.md`](MODULES.md) and [`..
 **Consequences.**
 - The enhancer's possible benefit (richer prompts) must come from M10 prompt templates; P0 results suggest the plain prompt with explicit appearance anchors is better for i2v anyway.
 - Manual experiments in the ComfyUI UI may still use the template as shipped; the rule applies to what the platform submits.
+
+## ADR-015: SeaweedFS replaces MinIO as the S3-compatible object store
+
+**Context.** Spec §5, §30 and §65 name MinIO. When M01 was built (2026-09-30), the official `minio/minio` and `minio/mc` images no longer existed on Docker Hub; the community edition is no longer distributed as images, so we would have to build and patch it ourselves. The platform needs only S3 semantics: buckets, object read/write, presigned URLs (ADR-010), per-key permissions.
+**Decision.** (Product owner, 2026-09-30.)
+- The object store is **SeaweedFS** (Apache-2.0), image `chrislusf/seaweedfs:<version>_large_disk` (official, linux/arm64 + amd64), pinned by version. One container runs master, volume, filer and the S3 gateway.
+- The application talks to it **only through the S3 API**, so the store can be replaced by any S3-compatible service without code changes. Settings are vendor-neutral: `S3_ENDPOINT`, `S3_ACCESS_KEY`, `S3_SECRET_KEY` (replacing spec §55's `MINIO_*`).
+- The application key is limited to the platform buckets (spec §30: `ai-video-assets`, `-models`, `-renders`, `-projects`, `-backups`): Read/Write/List/Tagging on those, nothing else. The identity file is generated at container start from the environment; no key is stored in the repo.
+- The store is never published outside the compose `data` network (ADR-010, spec §65 unchanged).
+**Consequences.**
+- Backups (M30) use SeaweedFS's filer/volume backup or an S3-level copy; to be designed there.
+- Bucket creation runs as a one-shot `storage-init` job on every `compose up` (idempotent).
+- Verified by `scripts/ci/compose_smoke.sh`: the app key can write/read/delete in platform buckets, cannot create other buckets; wrong-key and anonymous access get 403.

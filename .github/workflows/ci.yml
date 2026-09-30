@@ -44,5 +44,34 @@ jobs:
       - run: uv run mypy app tests alembic
       - run: uv run pytest
 
+  # API image for linux/arm64 (the GX10, spec §37), built under QEMU; then import the app inside it to prove
+  # every wheel resolved for aarch64. The amd64 image is built and exercised by compose-smoke.
+  image-arm64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: backend
+          platforms: linux/arm64
+          load: true
+          tags: yas-api:arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - run: >
+          docker run --rm --platform linux/arm64 --entrypoint python yas-api:arm64 -c
+          "import platform, app.main, asyncpg; assert platform.machine() == 'aarch64', platform.machine();
+          print('arm64 image ok')"
+
+  # Whole control plane via docker compose: health, routing, request ids, object-store permissions, network isolation.
+  compose-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash scripts/ci/compose_smoke.sh
+
   # Frontend eslint/tsc/test job: added with M27.
-  # arm64 buildx job: added with M01, when the first Dockerfiles exist.

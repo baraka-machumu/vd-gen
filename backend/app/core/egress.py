@@ -1,7 +1,7 @@
 """Egress guard (spec §38, §73): the only sanctioned way to make outbound HTTP calls from the backend.
 
 Every request, including each redirect hop, is checked at the transport layer:
-- hosts of the platform's own services (LLM, ComfyUI, MinIO, Redis, EXTRA_INTERNAL_HOSTS) are always allowed;
+- hosts of the platform's own services (LLM, ComfyUI, object store, Redis, EXTRA_INTERNAL_HOSTS) are always allowed;
 - any other host is allowed only when NETWORK_MODE=online, ENABLE_EXTERNAL_APIS=true and the host is in
   ALLOWED_EXTERNAL_HOSTS.
 Direct use of httpx/requests/urllib elsewhere in the backend is a lint error (ruff TID251, backend/pyproject.toml).

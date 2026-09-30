@@ -11,8 +11,8 @@ from app.core.config import Settings, get_settings
 BASE_ENV = {
     "APP_ENV": "test",
     "DATABASE_URL": "postgresql://test:test@localhost:5432/test",
-    "MINIO_ACCESS_KEY": "test-access",
-    "MINIO_SECRET_KEY": "test-secret",
+    "S3_ACCESS_KEY": "test-access",
+    "S3_SECRET_KEY": "test-secret",
     "LOG_JSON": "true",
 }
 

@@ -1,9 +1,10 @@
-# Private AI Video Production Platform (`yas-video-generator`)
+# Private AI Video Production Platform (`video-generator`)
 
 Self-hosted, offline-first platform for multi-scene, multi-episode AI video with consistent characters,
 environments, costumes, props, voices and story. Target hardware: **ASUS Ascent GX10 (NVIDIA GB10, 128 GB unified memory, arm64)**.
 
-> **Stage:** P0 (planning & foundations). No application code yet. Documentation comes first.
+> **Stage:** P0 spike done, P1 (infrastructure) in progress: backend core (M03) and the compose control plane (M01).
+> See [status/STATUS.md](status/STATUS.md).
 
 ## Start here
 
@@ -29,10 +30,19 @@ frontend/    React + TypeScript web portal
 ai-engine/   GPU execution service (NGC arm64): video/image/QC/audio/training adapters
 contracts/   Shared Pydantic job contracts
 workflows/   Versioned generation recipes
-infra/       Compose, nginx, postgres, redis, minio, monitoring
+infra/       nginx, seaweedfs (object store), monitoring config; docker-compose.yml is in the root
 scripts/     setup, health, models, backup, status
 docs/        spec, review, ADRs, modules, architecture
 status/      status.toml (source of truth) + generated STATUS.md
+```
+
+## Run the control plane
+
+```bash
+cp .env.example .env                 # replace every CHANGE_ME
+docker compose up -d --build --wait  # postgres, redis, seaweedfs, migrations, api, nginx
+curl http://127.0.0.1:8080/health
+bash scripts/ci/compose_smoke.sh     # end-to-end checks (CI runs the same)
 ```
 
 ## Updating status

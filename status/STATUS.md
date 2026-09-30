@@ -3,14 +3,14 @@
 
 **Current phase:** P0 · **Updated:** 2026-09-30 · **Target:** ASUS Ascent GX10 (NVIDIA GB10, 128 GB unified, arm64)
 
-**Tasks:** `████░░░░░░░░░░░░░░░░` 30/153 · **Definition of Done (spec §83):** `░░░░░░░░░░░░░░░░░░░░` 0/33
+**Tasks:** `████░░░░░░░░░░░░░░░░` 33/157 · **Definition of Done (spec §83):** `░░░░░░░░░░░░░░░░░░░░` 0/33
 
 ## Phases
 
 | Phase | Name | Status | Modules | Tasks |
 |---|---|---|---|---|
-| **P0** ◀ | Foundations & GX10 spike | 🟡 IN_PROGRESS | M00, M02, M17, M32 | `█████░░░░░` 24/48 |
-| **P1** | Infrastructure | 🟡 IN_PROGRESS | M01, M02, M03, M04, M14, M27, M29, M31, M32 | `██░░░░░░░░` 9/40 |
+| **P0** ◀ | Foundations & GX10 spike | 🟡 IN_PROGRESS | M00, M02, M17, M32 | `█████░░░░░` 24/49 |
+| **P1** | Infrastructure | 🟡 IN_PROGRESS | M01, M02, M03, M04, M14, M27, M29, M31, M32 | `███░░░░░░░` 12/43 |
 | **P2** | Project system | ⚪ NOT_STARTED | M05, M06, M07, M08, M09, M27, M32, M33 | `█░░░░░░░░░` 2/36 |
 | **P3** | AI Director | ⚪ NOT_STARTED | M08, M10, M11, M12, M13, M14, M27, M32 | `█░░░░░░░░░` 2/34 |
 | **P4** | Generation core | ⚪ NOT_STARTED | M13, M15, M16, M17, M18, M19, M27, M28, M32 | `██░░░░░░░░` 10/54 |
@@ -25,8 +25,8 @@
 
 | ID | Module | Phases | Status | Owner | Progress | Blocked by |
 |---|---|---|---|---|---|---|
-| M00 | Repository, governance & CI | P0 | 🟡 IN_PROGRESS | — | `████████░░` 13/17 |  |
-| M01 | Infrastructure & Compose | P1 | 🟡 IN_PROGRESS | — | `██░░░░░░░░` 1/5 |  |
+| M00 | Repository, governance & CI | P0 | 🟡 IN_PROGRESS | — | `███████░░░` 13/18 |  |
+| M01 | Infrastructure & Compose | P1 | 🟡 IN_PROGRESS | — | `█████░░░░░` 4/8 |  |
 | M02 | Hardware detection & System API | P0, P1 | 🟡 IN_PROGRESS | — | `██░░░░░░░░` 1/4 |  |
 | M03 | Backend core | P1 | 🟢 DONE | — | `██████████` 5/5 |  |
 | M04 | Authentication & RBAC | P1, P10 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/3 |  |
@@ -65,11 +65,12 @@
 - [ ] **M00** Owner sign-off on remaining Proposed ADRs (001-003, 005-007, 009, 010, 014) — TODO
 - [ ] **M00** Open questions remaining: revenue band, team size, throughput target, LLM preference — TODO
 - [ ] **M00** Branch protection on main (require repo-checks + backend CI, PR reviews) — TODO
-- [ ] **M00** CI: frontend job (with M27), arm64 buildx (with M01 Dockerfiles) — TODO
-- [ ] **M01** docker-compose.yml: postgres+pgvector, redis, minio, api, worker, scheduler, frontend, nginx — TODO
-- [ ] **M01** Compose profiles: gpu (ai-engine, llm), monitoring — TODO
-- [ ] **M01** Multi-arch Dockerfiles (arm64 required) — TODO
-- [ ] **M01** nginx: private routing + /media auth_request (ADR-010) — TODO
+- [ ] **M00** CI: arm64 image build (QEMU) + compose smoke test — DOING
+- [ ] **M00** CI: frontend job (with M27) — TODO
+- [ ] **M01** compose: worker + scheduler (with M14/M15), frontend (with M27) — TODO
+- [ ] **M01** Compose profiles: gpu (ai-engine with M17, llm with M11), monitoring (with M29) — TODO
+- [ ] **M01** API Dockerfile multi-arch (arm64 + amd64), non-root; arm64 build + import check in CI — DOING
+- [ ] **M01** nginx: /media auth_request (ADR-010), with M09 — TODO
 - [ ] **M02** Hardware probe service (uname, nvidia-smi, torch, disk, memory) — TODO
 - [ ] **M02** GET /api/v1/system/capabilities + /hardware — TODO
 - [ ] **M02** /health, /health/{database,redis,minio,gpu,models,comfyui} — TODO

@@ -14,7 +14,7 @@ The phases follow spec §81 with the amendments from review §8: a Phase 0 spike
 | Phase | Name | Goal | Exit criteria |
 |---|---|---|---|
 | **P0** | Foundations & GX10 spike | Repo, ADRs, CI; prove the GPU stack on real hardware | `verify_gx10.sh` passes on device; one LTX-2.3 i2v clip generated natively; time + peak memory recorded in `docs/models.md` |
-| **P1** | Infrastructure | Control plane runs end-to-end | `docker compose up` gives healthy postgres/redis/minio/api/frontend/nginx; `/health/*` green; JWT login works; arm64 buildx succeeds in CI |
+| **P1** | Infrastructure | Control plane runs end-to-end | `docker compose up` gives healthy postgres/redis/object store/api/frontend/nginx; `/health/*` green; JWT login works; arm64 buildx succeeds in CI |
 | **P2** | Project system | Domain CRUD for the bibles | Projects, Story Bible, characters, costumes, environments, props, assets: CRUD + upload + approval + versioning, with API tests |
 | **P3** | AI Director | Local LLM turns intent into a plan | "Create Episode 1" → outline → scenes → shots, schema-valid, each stage gated by approval |
 | **P4** | Generation core | Keyframe + video actually render | Shot → keyframe (image provider) → LTX i2v via scheduler on GX10; full provenance recorded; license-gated model registry |
@@ -41,7 +41,7 @@ Exit: repo + ADR log + module plan + status tracker; CI running lint (ruff, esli
 
 **M01: Infrastructure & Compose**
 P1 · `infra/`, `docker-compose*.yml` · §30, §36, §37, §55, §65, §66 · M00
-Exit: compose with api, worker, scheduler, frontend, nginx, postgres(+pgvector), redis, minio, and profiles for `gpu` (ai-engine, llm) and `monitoring`. Everything is private-network only, and MinIO is not published (ADR-010).
+Exit: compose with api, worker, scheduler, frontend, nginx, postgres(+pgvector), redis, object store (SeaweedFS, ADR-015), and profiles for `gpu` (ai-engine, llm) and `monitoring`. Everything is private-network only, and the object store is not published (ADR-010).
 
 **M02: Hardware detection & System API**
 P0 (script), P1 (API) · `backend/app/services/system/`, `scripts/setup/verify_gx10.sh` · §2, §35, §53, §74 · M03
@@ -75,7 +75,7 @@ Exit: join tables (review D2/D3), **explicit state machines** in `docs/architect
 
 **M09: Assets & Storage**
 P2 · `services/assets/` · §5, §30, §62, §65 · M01, M03
-Exit: immutable assets with lineage (D7), MinIO buckets, checksums, thumbnails, authenticated `/media` delivery (ADR-010), `asset_embeddings` (ADR-009).
+Exit: immutable assets with lineage (D7), object-store buckets (S3 API, ADR-015), checksums, thumbnails, authenticated `/media` delivery (ADR-010), `asset_embeddings` (ADR-009).
 
 ### Intelligence
 
@@ -169,7 +169,7 @@ Exit: Prometheus + Grafana with the §52 metrics, GPU/unified-memory exporters v
 
 **M30: Backup & Retention**
 P10 · `scripts/backup/` · §50 · M01, M09
-Exit: Postgres + MinIO backup, a **tested restore drill**, and a retention policy for failed-attempt media (review M4).
+Exit: Postgres + object-store backup, a **tested restore drill**, and a retention policy for failed-attempt media (review M4).
 
 **M31: Install & Ops Scripts**
 P1, P10 · `scripts/setup/`, `scripts/health/` · §74, §75 · M01, M02

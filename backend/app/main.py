@@ -36,7 +36,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.get("/health", tags=["system"])
     async def health() -> dict[str, str]:
-        """Liveness only. Dependency checks (/health/{database,redis,minio,gpu,...}) arrive with M02."""
+        """Liveness only. Dependency checks (/health/{database,redis,storage,gpu,...}) arrive with M02."""
         return {"status": "ok", "version": __version__}
 
     return app

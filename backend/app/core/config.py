@@ -35,9 +35,9 @@ class Settings(BaseSettings):
 
     database_url: SecretStr
     redis_url: str = "redis://redis:6379/0"
-    minio_endpoint: str = "minio:9000"
-    minio_access_key: SecretStr
-    minio_secret_key: SecretStr
+    s3_endpoint: str = "seaweedfs:8333"  # S3-compatible object store (ADR-015)
+    s3_access_key: SecretStr
+    s3_secret_key: SecretStr
 
     local_llm_base_url: AnyHttpUrl = AnyHttpUrl("http://llm:11434")
     local_llm_model: str = ""
@@ -95,7 +95,7 @@ class Settings(BaseSettings):
         hosts = {
             self.local_llm_base_url.host,
             self.comfyui_url.host,
-            urlsplit(f"//{self.minio_endpoint}").hostname,
+            urlsplit(f"//{self.s3_endpoint}").hostname,
             urlsplit(self.redis_url).hostname,
         }
         return frozenset(h.lower() for h in hosts if h) | self.extra_internal_hosts

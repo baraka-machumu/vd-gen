@@ -34,8 +34,8 @@ def test_secrets_are_not_printed() -> None:
 
 
 def test_credentials_are_required(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.delenv("MINIO_SECRET_KEY")
-    with pytest.raises(ValidationError, match="minio_secret_key"):
+    monkeypatch.delenv("S3_SECRET_KEY")
+    with pytest.raises(ValidationError, match="s3_secret_key"):
         Settings()
 
 
@@ -62,14 +62,14 @@ def test_internal_hosts_come_from_service_urls() -> None:
     s = make_settings(
         comfyui_url="http://gx10.local:8188",
         local_llm_base_url="http://llm:11434",
-        minio_endpoint="minio:9000",
+        s3_endpoint="seaweedfs:8333",
         extra_internal_hosts="nas.office.lan",
     )
-    assert s.internal_hosts() >= {"gx10.local", "llm", "minio", "redis", "nas.office.lan"}
+    assert s.internal_hosts() >= {"gx10.local", "llm", "seaweedfs", "redis", "nas.office.lan"}
 
 
 def test_env_example_is_a_valid_configuration() -> None:
-    """../.env.example must stay loadable: every key known, inline comments stripped, offline by default."""
+    """../.env.example must stay loadable: every setting documented, inline comments stripped, offline by default."""
     example = Path(__file__).resolve().parents[3] / ".env.example"
     s = Settings(_env_file=example)
     documented = {
@@ -77,7 +77,8 @@ def test_env_example_is_a_valid_configuration() -> None:
         for line in example.read_text(encoding="utf-8").splitlines()
         if "=" in line and not line.lstrip().startswith("#")
     }
-    assert documented == set(Settings.model_fields)
+    compose_only = {"postgres_user", "postgres_password", "postgres_db", "redis_password", "http_bind", "http_port"}
+    assert documented - compose_only == set(Settings.model_fields)
     assert s.network_mode is NetworkMode.OFFLINE
     assert s.allowed_external_hosts == frozenset()
-    assert s.comfyui_url.host == "ai-engine"
+    assert s.comfyui_url.host == "host.docker.internal"
