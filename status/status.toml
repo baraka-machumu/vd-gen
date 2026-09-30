@@ -92,7 +92,7 @@ tasks = [
   { title = "Branch protection on main (require repo-checks + backend CI, PR reviews)", status = "TODO" },
   { title = "CI: repo checks (pre-commit: hygiene, ruff, mypy scripts, STATUS.md) in .github/workflows/ci.yml", status = "DONE" },
   { title = "CI: backend job (mypy strict, pytest incl. PostgreSQL+pgvector service)", status = "DONE" },
-  { title = "CI: arm64 image build (QEMU) + compose smoke test", status = "DOING" },
+  { title = "CI: arm64 image build (QEMU) + compose smoke test, green on 590e651", status = "DONE" },
   { title = "CI: frontend job (with M27)", status = "TODO" },
   { title = "pre-commit hooks (ruff, mypy, hygiene, STATUS.md check); eslint/prettier added with M27", status = "DONE" },
 ]
@@ -107,7 +107,7 @@ tasks = [
   { title = "docker-compose.yml: postgres+pgvector, redis, seaweedfs (ADR-015) + bucket init, migrate, api, nginx; smoke-tested", status = "DONE" },
   { title = "compose: worker + scheduler (with M14/M15), frontend (with M27)", status = "TODO" },
   { title = "Compose profiles: gpu (ai-engine with M17, llm with M11), monitoring (with M29)", status = "TODO" },
-  { title = "API Dockerfile multi-arch (arm64 + amd64), non-root; arm64 build + import check in CI", status = "DOING" },
+  { title = "API Dockerfile multi-arch (arm64 + amd64), non-root; arm64 build + import check green in CI (590e651)", status = "DONE" },
   { title = "nginx: private routing, single published port on HTTP_BIND, request-id propagation, security headers", status = "DONE" },
   { title = "nginx: /media auth_request (ADR-010), with M09", status = "TODO" },
   { title = "Object store replaced: MinIO images withdrawn -> SeaweedFS (ADR-015), app key scoped to platform buckets", status = "DONE" },
