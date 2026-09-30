@@ -28,7 +28,7 @@
 | M00 | Repository, governance & CI | P0 | 🟡 IN_PROGRESS | — | `████████░░` 13/17 |  |
 | M01 | Infrastructure & Compose | P1 | 🟡 IN_PROGRESS | — | `██░░░░░░░░` 1/5 |  |
 | M02 | Hardware detection & System API | P0, P1 | 🟡 IN_PROGRESS | — | `██░░░░░░░░` 1/4 |  |
-| M03 | Backend core | P1 | 🟣 IN_REVIEW | — | `██████████` 5/5 |  |
+| M03 | Backend core | P1 | 🟢 DONE | — | `██████████` 5/5 |  |
 | M04 | Authentication & RBAC | P1, P10 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/3 |  |
 | M05 | Projects & Story Bible | P2 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/2 |  |
 | M06 | Characters & Costumes | P2 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/3 |  |
