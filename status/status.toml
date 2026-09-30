@@ -215,6 +215,7 @@ owner = ""
 tasks = [
   { title = "Deterministic section builder + snapshot tests", status = "TODO" },
   { title = "prompt_versions + diff API", status = "TODO" },
+  { title = "R-TEXT: never request legible text; rules + tests (review/02)", status = "TODO" },
 ]
 
 [[modules]]
@@ -239,6 +240,8 @@ tasks = [
   { title = "Planning schemas (episode/scene/shot)", status = "TODO" },
   { title = "Hierarchical directors (story, scene, shot, prompt)", status = "TODO" },
   { title = "Planning provenance (model, template, raw output)", status = "TODO" },
+  { title = "R-SHOT: one shot per generation, per-model max duration", status = "TODO" },
+  { title = "R-ACTION: flag DIFFICULT interactions, decompose into simpler shots", status = "TODO" },
 ]
 
 [[modules]]
@@ -301,6 +304,9 @@ tasks = [
   { title = "SPIKE: LTX-2.3 i2v one clip, time + peak memory (scripts/spike/ltx_spike.sh): awaiting GX10 run", status = "DOING" },
   { title = "SPIKE via existing ComfyUI on GX10 (LTX/Hunyuan/Wan installed): comfy_probe.py + comfy_run.py, awaiting run", status = "DOING" },
   { title = "Record spike results in docs/models.md + set throughput NFR", status = "TODO" },
+  { title = "Spike: first t2v clip reviewed; findings in docs/models.md + review/02", status = "DONE" },
+  { title = "Spike: LTX-2.3 i2v 5-8 s from keyframe (export i2v workflow)", status = "TODO" },
+  { title = "Spike: same shot with first/last frame; check IC-LoRA availability in ComfyUI", status = "TODO" },
   { title = "ai-engine image (ADR-007) + GPU job loop", status = "TODO" },
   { title = "Model load/unload with measured memory + cooperative cancel", status = "TODO" },
 ]
@@ -316,6 +322,8 @@ tasks = [
   { title = "LTXProvider: i2v, t2v, first/last frame", status = "TODO" },
   { title = "Profiles Draft/Preview/Production + two-stage upscale", status = "TODO" },
   { title = "Hunyuan/Wan providers report UNSUPPORTED until verified", status = "TODO" },
+  { title = "R-MOTION: IC-LoRA pose/depth control from reference footage", status = "TODO" },
+  { title = "Benchmark distilled vs dev checkpoint for human motion", status = "TODO" },
 ]
 
 [[modules]]
@@ -351,6 +359,7 @@ tasks = [
   { title = "Technical checks (ffprobe)", status = "TODO" },
   { title = "Character / environment / adherence / motion scorers", status = "TODO" },
   { title = "Calibration-set procedure + threshold config", status = "TODO" },
+  { title = "R-TEXT: OCR check for unexpected/garbled text", status = "TODO" },
 ]
 
 [[modules]]
@@ -408,6 +417,7 @@ tasks = [
   { title = "MVP preview: concatenate approved shots", status = "TODO" },
   { title = "timelines (EDL) + audio sync + subtitles", status = "TODO" },
   { title = "Render preview/1080p/4K-upscale", status = "TODO" },
+  { title = "R-TEXT: signage/logo compositing + lower-thirds", status = "TODO" },
 ]
 
 [[modules]]

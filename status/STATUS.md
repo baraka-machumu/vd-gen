@@ -3,22 +3,22 @@
 
 **Current phase:** P0 · **Updated:** 2026-09-29 · **Target:** ASUS Ascent GX10 (NVIDIA GB10, 128 GB unified, arm64)
 
-**Tasks:** `██░░░░░░░░░░░░░░░░░░` 10/128 · **Definition of Done (spec §83):** `░░░░░░░░░░░░░░░░░░░░` 0/33
+**Tasks:** `██░░░░░░░░░░░░░░░░░░` 11/138 · **Definition of Done (spec §83):** `░░░░░░░░░░░░░░░░░░░░` 0/33
 
 ## Phases
 
 | Phase | Name | Status | Modules | Tasks |
 |---|---|---|---|---|
-| **P0** ◀ | Foundations & GX10 spike | 🟡 IN_PROGRESS | M00, M02, M17, M32 | `███░░░░░░░` 10/32 |
+| **P0** ◀ | Foundations & GX10 spike | 🟡 IN_PROGRESS | M00, M02, M17, M32 | `███░░░░░░░` 11/35 |
 | **P1** | Infrastructure | ⚪ NOT_STARTED | M01, M02, M03, M04, M14, M27, M29, M31, M32 | `░░░░░░░░░░` 2/40 |
 | **P2** | Project system | ⚪ NOT_STARTED | M05, M06, M07, M08, M09, M27, M32, M33 | `█░░░░░░░░░` 2/36 |
-| **P3** | AI Director | ⚪ NOT_STARTED | M08, M10, M11, M12, M13, M14, M27, M32 | `█░░░░░░░░░` 2/31 |
-| **P4** | Generation core | ⚪ NOT_STARTED | M13, M15, M16, M17, M18, M19, M27, M28, M32 | `█░░░░░░░░░` 2/38 |
+| **P3** | AI Director | ⚪ NOT_STARTED | M08, M10, M11, M12, M13, M14, M27, M32 | `█░░░░░░░░░` 2/34 |
+| **P4** | Generation core | ⚪ NOT_STARTED | M13, M15, M16, M17, M18, M19, M27, M28, M32 | `█░░░░░░░░░` 3/43 |
 | **P5** | Reference system | ⚪ NOT_STARTED | M20, M27, M32 | `█░░░░░░░░░` 2/17 |
-| **P6** | QC & regeneration (MVP gate) | ⚪ NOT_STARTED | M21, M22, M26, M27, M32 | `█░░░░░░░░░` 2/22 |
+| **P6** | QC & regeneration (MVP gate) | ⚪ NOT_STARTED | M21, M22, M26, M27, M32 | `█░░░░░░░░░` 2/24 |
 | **P7** | LoRA & continuity | ⚪ NOT_STARTED | M23, M24, M27, M32 | `█░░░░░░░░░` 2/19 |
 | **P8** | Audio | ⚪ NOT_STARTED | M25, M27, M32 | `█░░░░░░░░░` 2/16 |
-| **P9** | Timeline & render | ⚪ NOT_STARTED | M26, M27, M32 | `█░░░░░░░░░` 2/17 |
+| **P9** | Timeline & render | ⚪ NOT_STARTED | M26, M27, M32 | `█░░░░░░░░░` 2/18 |
 | **P10** | Production hardening | ⚪ NOT_STARTED | M04, M28, M29, M30, M31, M32, M33 | `█░░░░░░░░░` 2/29 |
 
 ## Modules
@@ -35,23 +35,23 @@
 | M07 | Environments & Props | P2 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/2 |  |
 | M08 | Episodes, Scenes, Shots & Approvals | P2, P3 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/4 |  |
 | M09 | Assets & Storage | P2 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/5 |  |
-| M10 | Prompt Engine & Versioning | P3 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/2 |  |
+| M10 | Prompt Engine & Versioning | P3 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/3 |  |
 | M11 | LLM Provider Layer | P3 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/3 |  |
-| M12 | AI Director | P3 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/3 |  |
+| M12 | AI Director | P3 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/5 |  |
 | M13 | Realtime Events (WebSocket) | P3, P4 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/1 |  |
 | M14 | Job System & Workers | P1, P3 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/4 |  |
 | M15 | GPU Scheduler & Worker Registry | P4 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/3 |  |
 | M16 | Model Registry & License Registry | P4 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/5 |  |
-| M17 | AI Engine Runtime | P0, P4 | 🟡 IN_PROGRESS | Product owner (GX10 deployment) | `░░░░░░░░░░` 0/6 |  |
-| M18 | Video Providers | P4 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/4 |  |
+| M17 | AI Engine Runtime | P0, P4 | 🟡 IN_PROGRESS | Product owner (GX10 deployment) | `█░░░░░░░░░` 1/9 |  |
+| M18 | Video Providers | P4 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/6 |  |
 | M19 | Image / Keyframe Provider | P4 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/2 |  |
 | M20 | Reference Retrieval & Embeddings | P5 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/3 |  |
-| M21 | QC Engine | P6 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/3 |  |
+| M21 | QC Engine | P6 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/4 |  |
 | M22 | Regeneration Engine | P6 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/2 |  |
 | M23 | Continuity Engine | P7 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/2 |  |
 | M24 | LoRA Training & Management | P7 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/3 |  |
 | M25 | Audio | P8 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/2 |  |
-| M26 | Timeline & Render | P6, P9 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/3 |  |
+| M26 | Timeline & Render | P6, P9 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/4 |  |
 | M27 | Web Portal (Frontend) | P1, P2, P3, P4, P5, P6, P7, P8, P9 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/5 |  |
 | M28 | Audit & Provenance | P4, P10 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/3 |  |
 | M29 | Observability | P1, P10 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/3 |  |
@@ -75,6 +75,8 @@
 - [ ] **M17** SPIKE: LTX-2.3 i2v one clip, time + peak memory (scripts/spike/ltx_spike.sh): awaiting GX10 run — DOING
 - [ ] **M17** SPIKE via existing ComfyUI on GX10 (LTX/Hunyuan/Wan installed): comfy_probe.py + comfy_run.py, awaiting run — DOING
 - [ ] **M17** Record spike results in docs/models.md + set throughput NFR — TODO
+- [ ] **M17** Spike: LTX-2.3 i2v 5-8 s from keyframe (export i2v workflow) — TODO
+- [ ] **M17** Spike: same shot with first/last frame; check IC-LoRA availability in ComfyUI — TODO
 - [ ] **M17** ai-engine image (ADR-007) + GPU job loop — TODO
 - [ ] **M17** Model load/unload with measured memory + cooperative cancel — TODO
 - [ ] **M32** architecture.md — TODO

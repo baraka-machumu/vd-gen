@@ -26,6 +26,8 @@ frontend/dist/
 
 # Runtime data, never commit media or weights
 /data/
+storage/
+outputs/
 *.safetensors
 *.ckpt
 *.pt
