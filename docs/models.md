@@ -18,7 +18,7 @@ License status is tracked separately in M16 and is **not** implied by "runs on G
 
 | Model | Backend | Status on GX10 | Evidence |
 |---|---|---|---|
-| LTX-2.3 | ComfyUI (existing install) | **Runs.** t2v and i2v verified (i2v: warm runs only; cold not yet measured) | t2v: `ltx-i2v-20260930T085253Z.json` (this run was t2v despite the label); i2v: `ltx-i2v-20260930T103322Z.json` |
+| LTX-2.3 | ComfyUI (existing install) | **Runs.** t2v, i2v (warm + ComfyUI-cold) and first/last-frame (`LTXVAddGuide`) verified. IC-LoRA control models (pose/depth/canny): **UNAVAILABLE**, not installed (`GetICLoRAParameters` node present) | t2v: `ltx-i2v-20260930T085253Z.json` (this run was t2v despite the label); i2v: `ltx-i2v-20260930T103322Z.json` |
 | HunyuanVideo | ComfyUI (existing install) | Installed, not yet measured | — |
 | Wan | ComfyUI (existing install) | Installed, not yet measured | — |
 
@@ -30,6 +30,7 @@ License status is tracked separately in M16 and is **not** implied by "runs on G
 | 2026-09-30 | LTX-2.3 **i2v** (ComfyUI), dev fp8 + distilled LoRA 0.5, x2 spatial upscaler, audio on | 1280×704 @ 25 fps | 201 / 8.04 s | 102.1 s / 100.2 s (2 runs, **warm**) | **≈ 12.5 s** (ComfyUI exec 100.9 s / 99.0 s) | 8.8 GiB above ~55 GiB already resident; min available 57.8 GiB | 36/51 nodes cached (models loaded, enhanced prompt reused); fresh seeds, so not a cache hit. GPU peak 95 %, 83 W. Cold run not measured. `ltx-i2v-20260930T103322Z.json` |
 | 2026-09-30 | LTX-2.3 **i2v**, same workflow, **prompt enhancer off** | 1280×704 @ 25 fps | 201 / 8.04 s | 98.2 s / 100.2 s (2 runs, warm) | **≈ 12.2 s** (ComfyUI exec 97.8 s / 98.2 s) | 8.3 GiB; min available 58.1 GiB | Run 1 re-encoded the new prompt (31/51 cached), run 2 36/51. Removing the enhancer saves no measurable time. GPU peak 96 %, 84 W. `ltx-i2v-noenh-20260930T110141Z.json` |
 | 2026-09-30 | LTX-2.3 **i2v**, enhancer off, **cold ComfyUI** (`--cold`, models unloaded via `/free`) | 1280×704 @ 25 fps | 201 / 8.04 s | 108.3 s (1 run) | **≈ 13.4 s** (ComfyUI exec 107.6 s) | **46.9 GiB** from 105.1 GiB available; min available 58.1 GiB | 0/51 cached. Model load adds only ≈ 10 s because the OS page cache still held the weights: this is a ComfyUI cold start, **not** a cold start from disk (after reboot). GPU peak 95 %, 78 W. `ltx-i2v-cold-20260930T111849Z.json` |
+| 2026-09-30 | LTX-2.3 **first/last frame** (i2v + `LTXVAddGuide` frame −1 in pass 1, `LTXVCropGuides` before upscale), enhancer off | 1280×704 @ 25 fps | 201 / 8.04 s | 96.2 s / 92.1 s (2 runs, warm) | **≈ 11.6 s** (ComfyUI exec 94.5 s / 91.5 s) | 8.4 GiB; min available 56.9 GiB | The last-frame guide adds no measurable cost. Workflow built by `scripts/spike/make_flf_workflow.py` from the i2v export. `ltx-flf-20260930T124329Z.json` |
 
 **Early extrapolation:** a 10-min episode is ~600 s of video. At the i2v rate (~12.2 s/s warm, 8 s shots) that is ≈ 2.0 h raw generation at 720p, before regenerations and keyframes; model reload adds ≈ 10 s per load while the page cache is warm. The t2v rate (~25 s/s) gave ≈ 4 h. **Memory budget:** the LTX-2.3 i2v workflow needs ≈ 47 GiB at peak including its models, so it fits alongside the ~17 GiB system baseline with ~58 GiB to spare, but not alongside a second large model left loaded in ComfyUI.
 
@@ -77,3 +78,22 @@ Clip: `storage/ltx-i2v-cold-20260930T111849Z-run1/LTX_2.3_i2v_00011_.mp4`, same 
 |---|---|---|---|
 | Q13 | Third seed with enhancer off: same people, jackets and single continuous shot for 8 s (3/3 seeds now) | Positive | Confirms Q10 |
 | Q14 | The backpack shifts shape mid-clip: its straps become a brown bag hanging at his side (~2–6 s), then return to straps at 8 s | Low | Prop drift; describe props explicitly in M10 i2v prompts ("wearing a tan backpack on both shoulders"); include props in the M21 keyframe check |
+
+### First/last-frame run (2026-09-30)
+
+First frame `ComfyUI_00107_.png`, last frame `flf_last_A.png` (the final frame of the enhancer-off run 1: right man turned toward the left man). Prompt in `storage/flf_prompt.txt`. Clips: `storage/ltx-flf-20260930T124329Z-run{1,2}/LTX_2.3_i2v_0001{2,3}_.mp4`.
+
+End-frame match, measured as the mean absolute pixel difference to the target at 640×352 (0–255; lower is closer):
+
+| Clip | Last frame vs target |
+|---|---|
+| i2v without guide (2 clips) | 53.6 / 55.8 |
+| First/last frame run 1 / run 2 | **20.2 / 20.6** |
+
+The remaining ~20 is texture and fine detail (pass 2 re-renders the frame), not pose: both endings match the target's pose, framing and background figures.
+
+| # | Finding | Severity | Response |
+|---|---|---|---|
+| Q15 | Both runs land on the target end pose with the same people, wardrobe and backpack; one continuous shot | Positive | R-ACTION first/last-frame mode is feasible on the GX10 with the installed nodes |
+| Q16 | Run 1 converges gradually (difference 45 → 33 → 24 → 20 over frames 150–200); run 2 stays far until frame ~185, then closes in the last ~0.6 s (45 → 20), which risks a visible "snap" into the end pose | Medium | Review run 2 at full speed. Mitigations to test: guide strength < 1.0, the guide in pass 2 as well, and prompts that time the action ("…by the end of the shot") |
+| Q17 | Run 2: the left man looks away at ~4 s, though the prompt says he keeps looking at his phone | Low | Normal seed variance; QC/regeneration handles it |

@@ -65,3 +65,6 @@ Keyframe-first did **not** by itself keep identity: the characters change clothe
 
 ### Result of the enhancer-off rerun (2026-09-30)
 Confirmed: with the enhancer off, both seeds keep identity, wardrobe and a single continuous shot for 8 s (models.md Q10). The R-SHOT addition above therefore means **prompt enhancer off by default** in production LTX workflows; the prompt engine (M10) owns prompt quality. With the enhancer off, the abliterated Gemma LoRA is not used either.
+
+### First/last-frame result (2026-09-30)
+R-ACTION's first/last-frame mode works with the stock ComfyUI nodes (`LTXVAddGuide` on the last frame, `LTXVCropGuides` before upscaling) at no extra cost: 2/2 runs end on the target pose (models.md Q15). Open: a late "snap" into the end pose in one run (Q16). R-MOTION remains blocked: no LTX-2.3 IC-LoRA control models are installed on the GX10 (`UNAVAILABLE`).
