@@ -85,11 +85,12 @@ tasks = [
   { title = "git init + initial commit", status = "DONE" },
   { title = "ADR-004 accepted (native pipelines)", status = "DONE" },
   { title = "ADR-013 accepted: ComfyUI primary backend (supersedes ADR-004)", status = "DONE" },
-  { title = "Owner sign-off on remaining Proposed ADRs (001-003, 005-007, 009, 010, 014)", status = "TODO" },
+  { title = "Owner sign-off on Proposed ADRs 001-003, 005-007, 009, 010, 014: accepted 2026-09-30", status = "DONE" },
   { title = "Open questions answered: deployment, likeness, bring-up owner, backend (ADR-012)", status = "DONE" },
-  { title = "Open questions remaining: revenue band, team size, throughput target, LLM preference", status = "TODO" },
+  { title = "Open questions answered 2026-09-30: revenue band (owner: within license terms), throughput (provisional NFR)", status = "DONE" },
+  { title = "Open questions remaining: team size, LLM choice for the AI Director (ADR-016, benchmark)", status = "TODO" },
   { title = "Create remote: github.com/baraka-machumu/vd-gen (private), main pushed 2026-09-30", status = "DONE" },
-  { title = "Branch protection on main (require repo-checks + backend CI, PR reviews)", status = "TODO" },
+  { title = "Branch protection on main: require CI checks, block force-push/deletion (owner approved; set in GitHub UI)", status = "TODO" },
   { title = "CI: repo checks (pre-commit: hygiene, ruff, mypy scripts, STATUS.md) in .github/workflows/ci.yml", status = "DONE" },
   { title = "CI: backend job (mypy strict, pytest incl. PostgreSQL+pgvector service)", status = "DONE" },
   { title = "CI: arm64 image build (QEMU) + compose smoke test, green on 590e651", status = "DONE" },
@@ -298,7 +299,7 @@ tasks = [
   { title = "model_licenses + admin approval gate", status = "TODO" },
   { title = "scripts/models/fetch.py: pinned revision + SHA256 + offline bundle", status = "TODO" },
   { title = "Verify licenses for LTX-2.3, image model, QC face model (internal use is still commercial use)", status = "TODO" },
-  { title = "Confirm company revenue band against LTX license terms", status = "TODO" },
+  { title = "Confirm company revenue band against LTX license terms: product owner confirmed 2026-09-30 that it permits use", status = "DONE" },
 ]
 
 [[modules]]
@@ -318,7 +319,7 @@ tasks = [
   { title = "Spike: i2v rerun with prompt enhancer off (same keyframe, 2 seeds): fixes Q7/Q8, see Q10", status = "DONE" },
   { title = "Spike: i2v cold run (--cold) for model-load time: ~10 s with warm page cache, peak 46.9 GiB", status = "DONE" },
   { title = "Spike (optional): cold-from-disk load time after drop_caches or reboot, GX10 idle", status = "TODO" },
-  { title = "Decide on abliterated Gemma text-encoder LoRA in production workflows: ADR-014 proposed, awaiting sign-off", status = "DOING" },
+  { title = "Decide on abliterated Gemma text-encoder LoRA in production workflows: ADR-014 accepted 2026-09-30", status = "DONE" },
   { title = "Spike: same shot with first/last frame (LTXVAddGuide): 2/2 runs hit end pose, Q15-Q17; IC-LoRA models not installed", status = "DONE" },
   { title = "Spike: first/last-frame end-pose snap (Q16): reviewed, accepted by product owner", status = "DONE" },
   { title = "Install + test LTX-2.3 IC-LoRA control models (pose/depth) for R-MOTION (deferred until after P4; needs M16 license entry)", status = "TODO" },

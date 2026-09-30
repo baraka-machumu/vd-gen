@@ -6,20 +6,20 @@ When an ADR changes a module's scope, update [`MODULES.md`](MODULES.md) and [`..
 
 | ADR | Title | Status | Blocks |
 |---|---|---|---|
-| 001 | Monorepo layout per spec §54 | Proposed | M00 |
-| 002 | Control plane / GPU plane split | Proposed | M01, M17 |
-| 003 | Job system: Postgres is the source of truth, Redis carries signals only | Proposed | M14 |
+| 001 | Monorepo layout per spec §54 | Accepted (2026-09-30) | M00 |
+| 002 | Control plane / GPU plane split | Accepted (2026-09-30) | M01, M17 |
+| 003 | Job system: Postgres is the source of truth, Redis carries signals only | Accepted (2026-09-30) | M14 |
 | 004 | MVP execution backend: native pipelines, ComfyUI after the MVP | **Superseded by ADR-013** (2026-09-30) | — |
-| 005 | Unified-memory GPU scheduler; the LLM is a GPU tenant | Proposed | M15 |
-| 006 | One capability-based provider interface per modality | Proposed | M11, M18, M19, M25 |
-| 007 | GPU images are based on NVIDIA NGC arm64 containers | Proposed | M17 |
+| 005 | Unified-memory GPU scheduler; the LLM is a GPU tenant | Accepted (2026-09-30) | M15 |
+| 006 | One capability-based provider interface per modality | Accepted (2026-09-30) | M11, M18, M19, M25 |
+| 007 | GPU images are based on NVIDIA NGC arm64 containers | Accepted (2026-09-30) | M17 |
 | 008 | Keyframe/identity image model: selected by benchmark | **Open** | M19 |
-| 009 | A single `asset_embeddings` table; visual memory is a view | Proposed | M09, M20 |
-| 010 | Media delivery through nginx `auth_request`; MinIO never exposed | Proposed | M09, M01 |
+| 009 | A single `asset_embeddings` table; visual memory is a view | Accepted (2026-09-30) | M09, M20 |
+| 010 | Media delivery through nginx `auth_request`; MinIO never exposed | Accepted (2026-09-30) | M09, M01 |
 | 011 | Status tracking lives in `status/status.toml` | Accepted (2026-09-29) | — |
 | 012 | Deployment scope: private office network, employee likenesses | Accepted (2026-09-29) | M01, M06, M25, M33 |
 | 013 | ComfyUI is the primary video execution backend | Accepted (2026-09-30) | M15, M17, M18, M19, M28 |
-| 014 | No in-workflow prompt enhancement; no abliterated models | Proposed | M10, M11, M16, M18 |
+| 014 | No in-workflow prompt enhancement; no abliterated models | Accepted (2026-09-30) | M10, M11, M16, M18 |
 | 015 | SeaweedFS replaces MinIO as the S3-compatible object store | Accepted (2026-09-30) | M01, M09, M30 |
 
 ---
@@ -29,6 +29,7 @@ When an ADR changes a module's scope, update [`MODULES.md`](MODULES.md) and [`..
 **Context.** The spec defines a single-repo layout. Its placement of `ai_director/` and similar packages conflicts with §10 and §24 (review C10).
 **Decision.** Use one repo with the top-level folders `backend/`, `frontend/`, `ai-engine/`, `contracts/`, `workflows/`, `infra/`, `scripts/`, `docs/` and `status/`. Domain services live under `backend/app/services/<domain>/`. The new `contracts/` package holds the Pydantic job payload/result schemas that the backend and the ai-engine share.
 **Consequences.** One PR can change an API contract and both of its sides. The backend and ai-engine keep separate dependency lockfiles (see ADR-002).
+**Accepted** 2026-09-30 by the product owner.
 
 ## ADR-002: Control plane / GPU plane split
 
@@ -38,6 +39,7 @@ When an ADR changes a module's scope, update [`MODULES.md`](MODULES.md) and [`..
 - **GPU plane** (`ai-engine`, `llm`): arm64 only, runs on the GX10. It registers with the scheduler through a heartbeat (§67).
 - With no GPU plane registered, every GPU provider reports `UNAVAILABLE` and GPU jobs stay `QUEUED`. The UI says so explicitly.
 **Consequences.** The whole control plane can be developed and tested off-device. It also prepares multi-GX10 support (§66) from day one.
+**Accepted** 2026-09-30 by the product owner.
 
 ## ADR-003: Job system: Postgres is the source of truth, Redis carries signals only
 
@@ -48,6 +50,7 @@ When an ADR changes a module's scope, update [`MODULES.md`](MODULES.md) and [`..
 - Redis is used for wake-up notifications (so workers don't poll), for progress pub/sub, and for the WebSocket fan-out. Losing Redis loses no state.
 - Domain results (`generation_attempts`, `assets`) are written in the same transaction that marks the job `SUCCEEDED`.
 **Consequences.** The system stays correct across crashes and can be inspected with plain SQL. It needs a small amount of custom code (~500 LOC) instead of Celery. Arq or Dramatiq were considered, but their job state lives in Redis.
+**Accepted** 2026-09-30 by the product owner.
 
 ## ADR-004: MVP execution backend: native pipelines, ComfyUI after the MVP
 
@@ -64,12 +67,14 @@ When an ADR changes a module's scope, update [`MODULES.md`](MODULES.md) and [`..
 - The LLM server is a tenant. The scheduler can request an unload (for example, Ollama `keep_alive=0`) before large video jobs, and it batches planning jobs so the LLM is loaded less often.
 - `MAX_CONCURRENT_VIDEO_JOBS=1` at first (§56).
 **Consequences.** Planning and rendering are serialized under memory pressure, so the UI shows the scheduler state (§33 states).
+**Accepted** 2026-09-30 by the product owner.
 
 ## ADR-006: One capability-based provider interface per modality
 
 **Context.** Two conflicting interfaces appear in §6 and §72 (review C3).
 **Decision.** Each modality has one ABC (`LLMProvider`, `ImageProvider`, `VideoProvider`, `SpeechProvider`, `MusicProvider`, `SFXProvider`, `UpscaleProvider`, `EmbeddingProvider`). Every ABC exposes `capabilities() -> set[Capability]`, `health_check()`, `estimate_resources(request)` and one typed `run(request)` per operation. An operation outside a provider's capabilities raises `CapabilityNotSupported`. Provider status is one of `AVAILABLE | UNAVAILABLE | UNSUPPORTED_ON_CURRENT_HARDWARE | NOT_APPROVED`.
 **Consequences.** The UI and the regeneration engine query capabilities instead of hard-coding them per model.
+**Accepted** 2026-09-30 by the product owner.
 
 ## ADR-007: GPU images are based on NVIDIA NGC arm64 containers
 
@@ -77,6 +82,7 @@ When an ADR changes a module's scope, update [`MODULES.md`](MODULES.md) and [`..
 **Decision.** `ai-engine` builds `FROM nvcr.io/nvidia/pytorch:<tag>` (an arm64 tag that has been validated on DGX OS). Each tag bump runs `scripts/health/gpu_smoke.py`: torch.cuda, device name, a bf16 matmul, attention kernels and a model load.
 **Consequences.** The Python version inside ai-engine follows NGC and is decoupled from the backend.
 **Amended by ADR-013:** for the MVP, the GPU runtime is the existing ComfyUI install on the GX10. This ADR now applies when that install is containerized (M17), and to any native-pipeline fallback.
+**Accepted** 2026-09-30 by the product owner.
 
 ## ADR-008: Keyframe/identity image model: selected by benchmark (OPEN)
 
@@ -87,11 +93,13 @@ When an ADR changes a module's scope, update [`MODULES.md`](MODULES.md) and [`..
 ## ADR-009: A single `asset_embeddings` table; visual memory is a view
 
 **Decision.** `asset_embeddings(asset_id, embedding_model, dim, vector, created_at)` has one partial HNSW index per `embedding_model`. `project_visual_memory` is a SQL view over approved assets joined with their embeddings and tags. The reference tables (`character_references`, etc.) don't store vectors themselves.
+**Accepted** 2026-09-30 by the product owner.
 
 ## ADR-010: Media delivery through nginx `auth_request`; MinIO never exposed
 
 **Decision.** The browser requests `/media/{asset_id}?token=…`. nginx calls `auth_request` against the API, which checks the JWT or short-TTL token and the project membership, then proxies to MinIO over the internal network. MinIO's ports are not published.
 **Amended by ADR-015:** the object store is SeaweedFS; "MinIO" here means the object store.
+**Accepted** 2026-09-30 by the product owner.
 
 ## ADR-011: Status tracking lives in `status/status.toml`
 
@@ -140,6 +148,7 @@ When an ADR changes a module's scope, update [`MODULES.md`](MODULES.md) and [`..
 **Consequences.**
 - The enhancer's possible benefit (richer prompts) must come from M10 prompt templates; P0 results suggest the plain prompt with explicit appearance anchors is better for i2v anyway.
 - Manual experiments in the ComfyUI UI may still use the template as shipped; the rule applies to what the platform submits.
+**Accepted** 2026-09-30 by the product owner.
 
 ## ADR-015: SeaweedFS replaces MinIO as the S3-compatible object store
 

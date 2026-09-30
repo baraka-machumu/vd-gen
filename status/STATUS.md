@@ -3,17 +3,17 @@
 
 **Current phase:** P0 · **Updated:** 2026-09-30 · **Target:** ASUS Ascent GX10 (NVIDIA GB10, 128 GB unified, arm64)
 
-**Tasks:** `████░░░░░░░░░░░░░░░░` 35/157 · **Definition of Done (spec §83):** `░░░░░░░░░░░░░░░░░░░░` 0/33
+**Tasks:** `█████░░░░░░░░░░░░░░░` 39/158 · **Definition of Done (spec §83):** `░░░░░░░░░░░░░░░░░░░░` 0/33
 
 ## Phases
 
 | Phase | Name | Status | Modules | Tasks |
 |---|---|---|---|---|
-| **P0** ◀ | Foundations & GX10 spike | 🟡 IN_PROGRESS | M00, M02, M17, M32 | `█████░░░░░` 25/49 |
+| **P0** ◀ | Foundations & GX10 spike | 🟡 IN_PROGRESS | M00, M02, M17, M32 | `██████░░░░` 28/50 |
 | **P1** | Infrastructure | 🟡 IN_PROGRESS | M01, M02, M03, M04, M14, M27, M29, M31, M32 | `███░░░░░░░` 13/43 |
 | **P2** | Project system | ⚪ NOT_STARTED | M05, M06, M07, M08, M09, M27, M32, M33 | `█░░░░░░░░░` 2/36 |
 | **P3** | AI Director | ⚪ NOT_STARTED | M08, M10, M11, M12, M13, M14, M27, M32 | `█░░░░░░░░░` 2/34 |
-| **P4** | Generation core | ⚪ NOT_STARTED | M13, M15, M16, M17, M18, M19, M27, M28, M32 | `██░░░░░░░░` 10/54 |
+| **P4** | Generation core | ⚪ NOT_STARTED | M13, M15, M16, M17, M18, M19, M27, M28, M32 | `██░░░░░░░░` 12/54 |
 | **P5** | Reference system | ⚪ NOT_STARTED | M20, M27, M32 | `█░░░░░░░░░` 2/17 |
 | **P6** | QC & regeneration (MVP gate) | ⚪ NOT_STARTED | M21, M22, M26, M27, M32 | `█░░░░░░░░░` 2/24 |
 | **P7** | LoRA & continuity | ⚪ NOT_STARTED | M23, M24, M27, M32 | `█░░░░░░░░░` 2/19 |
@@ -25,7 +25,7 @@
 
 | ID | Module | Phases | Status | Owner | Progress | Blocked by |
 |---|---|---|---|---|---|---|
-| M00 | Repository, governance & CI | P0 | 🟡 IN_PROGRESS | — | `████████░░` 14/18 |  |
+| M00 | Repository, governance & CI | P0 | 🟡 IN_PROGRESS | — | `████████░░` 16/19 |  |
 | M01 | Infrastructure & Compose | P1 | 🟡 IN_PROGRESS | — | `██████░░░░` 5/8 |  |
 | M02 | Hardware detection & System API | P0, P1 | 🟡 IN_PROGRESS | — | `██░░░░░░░░` 1/4 |  |
 | M03 | Backend core | P1 | 🟢 DONE | — | `██████████` 5/5 |  |
@@ -41,8 +41,8 @@
 | M13 | Realtime Events (WebSocket) | P3, P4 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/1 |  |
 | M14 | Job System & Workers | P1, P3 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/4 |  |
 | M15 | GPU Scheduler & Worker Registry | P4 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/3 |  |
-| M16 | Model Registry & License Registry | P4 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/5 |  |
-| M17 | AI Engine Runtime | P0, P4 | 🟡 IN_PROGRESS | Product owner (GX10 deployment) | `████░░░░░░` 8/18 |  |
+| M16 | Model Registry & License Registry | P4 | ⚪ NOT_STARTED | — | `██░░░░░░░░` 1/5 |  |
+| M17 | AI Engine Runtime | P0, P4 | 🟡 IN_PROGRESS | Product owner (GX10 deployment) | `█████░░░░░` 9/18 |  |
 | M18 | Video Providers | P4 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/8 |  |
 | M19 | Image / Keyframe Provider | P4 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/2 |  |
 | M20 | Reference Retrieval & Embeddings | P5 | ⚪ NOT_STARTED | — | `░░░░░░░░░░` 0/3 |  |
@@ -62,9 +62,8 @@
 
 ## Active & blocked tasks
 
-- [ ] **M00** Owner sign-off on remaining Proposed ADRs (001-003, 005-007, 009, 010, 014) — TODO
-- [ ] **M00** Open questions remaining: revenue band, team size, throughput target, LLM preference — TODO
-- [ ] **M00** Branch protection on main (require repo-checks + backend CI, PR reviews) — TODO
+- [ ] **M00** Open questions remaining: team size, LLM choice for the AI Director (ADR-016, benchmark) — TODO
+- [ ] **M00** Branch protection on main: require CI checks, block force-push/deletion (owner approved; set in GitHub UI) — TODO
 - [ ] **M00** CI: frontend job (with M27) — TODO
 - [ ] **M01** compose: worker + scheduler (with M14/M15), frontend (with M27) — TODO
 - [ ] **M01** Compose profiles: gpu (ai-engine with M17, llm with M11), monitoring (with M29) — TODO
@@ -76,7 +75,6 @@
 - [ ] **M17** Optional: native LTX-2.3 fallback check (scripts/spike/ltx_spike.sh), not run; ComfyUI path measured instead (ADR-013) — TODO
 - [ ] **M17** Spike: measure HunyuanVideo + Wan i2v via comfy_run.py (same keyframe) — TODO
 - [ ] **M17** Spike (optional): cold-from-disk load time after drop_caches or reboot, GX10 idle — TODO
-- [ ] **M17** Decide on abliterated Gemma text-encoder LoRA in production workflows: ADR-014 proposed, awaiting sign-off — DOING
 - [ ] **M17** Install + test LTX-2.3 IC-LoRA control models (pose/depth) for R-MOTION (deferred until after P4; needs M16 license entry) — TODO
 - [ ] **M17** Record ComfyUI version + custom-node commits + model SHA256 on GX10 (pinning baseline) — TODO
 - [ ] **M17** Golden-workflow regression check for ComfyUI updates — TODO
